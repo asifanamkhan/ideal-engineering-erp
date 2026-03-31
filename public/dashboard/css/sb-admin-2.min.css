@@ -41,6 +41,7 @@
         "Noto Color Emoji";
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas,
         "Liberation Mono", "Courier New", monospace;
+
 }
 *,
 ::after,
@@ -67,9 +68,7 @@ section {
 }
 body {
     margin: 0;
-    font-family: Poppins, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
-        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-family: "Roboto Condensed", sans-serif;
     font-size: 1rem;
     font-weight: 400;
     /* line-height: 1.5; */
@@ -5298,7 +5297,7 @@ a.close.disabled {
     pointer-events: auto;
     background-color: #fff;
     background-clip: padding-box;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 1px solid forestgreen;
     border-radius: 0.3rem;
     outline: 0;
 }
@@ -5321,7 +5320,7 @@ a.close.disabled {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 1rem 1rem;
+    padding: 0.4rem 1rem;
     border-bottom: 1px solid #e3e6f0;
     border-top-left-radius: calc(0.3rem - 1px);
     border-top-right-radius: calc(0.3rem - 1px);
@@ -9031,8 +9030,8 @@ a:focus {
 .container-md,
 .container-sm,
 .container-xl {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: 1.2rem;
+    padding-right: 1.2rem;
 }
 .scroll-to-top {
     position: fixed;
@@ -9325,7 +9324,7 @@ a:focus {
     width: 2rem;
 }
 .topbar {
-    height: 4.375rem;
+    height: 3.375rem;
 }
 .topbar #sidebarToggleTop {
     height: 2.5rem;
@@ -9472,7 +9471,7 @@ a:focus {
     display: block;
 }
 .sidebar .nav-item.active .nav-link {
-    font-weight: 700;
+    font-weight: 600;
 }
 .sidebar .nav-item .collapse {
     position: absolute;
@@ -9519,12 +9518,13 @@ a:focus {
 }
 .sidebar .nav-item .collapse .collapse-inner .collapse-item:hover,
 .sidebar .nav-item .collapsing .collapse-inner .collapse-item:hover {
-    background-color: #eaecf4;
-    color: #3a3b45;
+    background-color: #0e0063;
+    /* color: #3a3b45; */
 }
 .sidebar .nav-item .collapse .collapse-inner .collapse-item:active,
 .sidebar .nav-item .collapsing .collapse-inner .collapse-item:active {
     background-color: #dddfeb;
+    color: #3a3b45;
 }
 .sidebar .nav-item .collapse .collapse-inner .collapse-item.active,
 .sidebar .nav-item .collapsing .collapse-inner .collapse-item.active {
@@ -9564,7 +9564,7 @@ a:focus {
     display: none;
 }
 .sidebar .sidebar-brand {
-    height: 4.375rem;
+    height: 3.375rem;
     text-decoration: none;
     font-size: 20px;
     font-weight: 800;
@@ -9641,7 +9641,7 @@ a:focus {
         display: block;
         width: 100%;
         text-align: left;
-        padding: 1rem;
+        padding: 0.7rem 1rem;
         width: 14rem;
     }
     .sidebar .nav-item .nav-link i {
@@ -9653,6 +9653,7 @@ a:focus {
         /* font-size: 0.85rem; */
         font-size: 1rem;
         display: inline;
+
     }
     .sidebar .nav-item .nav-link[data-toggle="collapse"]::after {
         width: 1rem;
@@ -9698,6 +9699,7 @@ a:focus {
     .sidebar.toggled .nav-item .collapse .collapse-inner {
         box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         border-radius: 0.35rem;
+        background: #13027D !important;
     }
     .sidebar.toggled .nav-item .collapsing {
         display: none;
@@ -9813,6 +9815,7 @@ a:focus {
 }
 .sidebar-dark .nav-item.active .nav-link {
     color: #fff;
+    background: #10035b !important;
 }
 .sidebar-dark .nav-item.active .nav-link i {
     color: #ffffff;
@@ -10330,7 +10333,7 @@ form.user .btn-user {
     animation: noise-anim-2 3s infinite linear alternate-reverse;
 }
 footer.sticky-footer {
-    padding: 2rem 0;
+    padding: 1rem 0;
     flex-shrink: 0;
 }
 footer.sticky-footer .copyright {

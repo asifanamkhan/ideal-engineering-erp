@@ -42,7 +42,8 @@
                             <div class="col-lg-12">
                                 <div class="p-5">
                                     <div class="text-center">
-                                        <h1 class="h5 text-gray-900 mb-4"><img style="width:50%" src="https://rapiderp.excellency-catering-restaurant-sweets.com/img/company/company_logo.png" alt=""></h1>
+                                        {{-- <h1 class="h5 text-gray-900 mb-4"><img style="width:50%" src="" alt=""></h1> --}}
+                                        <h1 style="color: #13027D; margin-bottom:80px">IDEAL ENGINEERING</h1>
                                     </div>
 
                                     <form class="user" method="POST" action="{{ route('login') }}">
@@ -69,11 +70,11 @@
                                             <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
                                         </a> --}}
                                     </form>
-                                    <hr>
-                                    <div class="text-center">
-                                        {{-- <a class="small" href="forgot-password.html">Forgot Password?</a> --}}
+                                    {{-- <hr> --}}
+                                    {{-- <div class="text-center">
+                                        <a class="small" href="forgot-password.html">Forgot Password?</a>
                                         <a class="small" href="{{ route('candidate.register') }}">New Registration</a>
-                                    </div>
+                                    </div> --}}
 
                                 </div>
                             </div>
