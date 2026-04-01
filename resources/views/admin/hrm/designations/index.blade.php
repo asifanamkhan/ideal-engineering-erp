@@ -13,11 +13,11 @@
     <div class="page-header">
         <div class="d-flex align-items-center justify-content-between">
             <div>
-                <h4 class="mb-1"><i class="fas fa-bolt "></i> All Designations List</h4>
+                <h4 class="mb-1"><i class="fas fa-asterisk"></i> All Designations List</h4>
             </div>
 
             <div>
-                <a href="#" class="btn btn-primary btn-sm" id="addNewdesignation">
+                <a href="#" class="btn btn-primary shadow-sm px-5" id="addNewdesignation">
                     <i class="fas fa-plus "></i> Add New Designation
                 </a>
             </div>

@@ -14,21 +14,36 @@
     .custom-file-label::after {
         content: "Browse";
     }
-    .new-logo-preview .preview-container {
+
+    .current-photo {
+        text-align: center;
+    }
+    .current-photo img {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 8px;
         border: 2px solid #28a745;
-        border-radius: 5px;
-        padding: 5px;
     }
 </style>
 @endsection
 @section('content')
 <div class="container-fluid">
+    <div class="page-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h4 class="mb-1"><i class="fas fa-cog"></i> General Settings</h4>
+            </div>
+
+            <div>
+                <a href="#" class="btn btn-primary btn px-5" id="addNewPart">
+                    <i class="fas fa-plus"></i>
+                </a>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-12">
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">General Settings</h6>
-                </div>
                 <div class="card-body">
                     @if(Session::has('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -54,7 +69,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="company_name">Company Name <span class="text-danger">*</span></label>
-                                    <input type="text" name="company_name" id="company_name" class="form-control @error('company_name') is-invalid @enderror" value="{{ $setting->company_name ?? old('company_name') }}" required>
+                                    <input type="text" name="company_name" id="company_name" class="form-control @error('company_name') is-invalid @enderror" value="{{ @$generel_settings->company_name ?? old('company_name') }}" required>
                                     @error('company_name')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
@@ -63,7 +78,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="email">Email</label>
-                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ $setting->email ?? old('email') }}">
+                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ @$generel_settings->email ?? old('email') }}">
                                     @error('email')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
@@ -75,7 +90,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="phone">Phone <span class="text-danger">*</span></label>
-                                    <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ $setting->phone ?? old('phone') }}" required>
+                                    <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ @$generel_settings->phone ?? old('phone') }}" required>
                                     @error('phone')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
@@ -84,7 +99,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="phone">Alternative Phone  <span class="text-danger">*</span></label>
-                                    <input type="text" name="phone_two" id="phone_two" class="form-control @error('phone_two') is-invalid @enderror" value="{{ $setting->phone_two ?? old('phone_two') }}">
+                                    <input type="text" name="phone_two" id="phone_two" class="form-control @error('phone_two') is-invalid @enderror" value="{{ @$generel_settings->phone_two ?? old('phone_two') }}">
                                     @error('phone_two')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
@@ -92,12 +107,35 @@
                             </div>
                             <div class="col-md-12 form-group">
                                 <label for="address">Address <span class="text-danger">*</span></label>
-                                <textarea name="address" id="address" class="form-control @error('address') is-invalid @enderror" rows="3" required>{{ $setting->address ?? old('address') }}</textarea>
+                                <textarea name="address" id="address" class="form-control @error('address') is-invalid @enderror" rows="3" required>{{ @$generel_settings->address ?? old('address') }}</textarea>
                                 @error('address')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
-                            <div class="col-md-12">
+                            <h5 class="section-title">
+                                <i class="fas fa-camera"></i>Logo
+                            </h5>
+                            <div class="col-md-12 row">
+                                <div class="col-md-6">
+                                    <div class="photo-upload-area" id="photoUploadArea">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p class="mb-2">Click or drag photo to upload (leave empty to keep current)</p>
+                                        <img id="photoPreview" class="photo-preview d-none" src="#" alt="Preview">
+                                        <input type="file" name="logo" id="photoInput" class="d-none" accept="image/*">
+                                    </div>
+                                    @error('logo')<div class="invalid-feedback d-block small">{{ $message }}</div>@enderror
+                                    <div class="info-text">Supported: JPG, PNG, GIF. Max: 2MB</div>
+                                </div>
+                                <div class="col-md-6">
+                                    @if(@$generel_settings->logo)
+                                        <div class="current-photo mb-3">
+                                            <label class="form-label">Current logo:</label>
+                                            <img src="{{ asset(@$generel_settings->logo) }}" alt="Current logo">
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                            {{-- <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="logo">Logo</label>
                                     <div class="logo-upload-container">
@@ -111,12 +149,12 @@
 
                                         <!-- Logo Preview Box -->
                                         <div class="logo-preview-box mt-3" id="logoPreviewBox">
-                                            @if(isset($setting->logo) && $setting->logo)
+                                            @if(isset(@$generel_settings->logo) && @$generel_settings->logo)
                                                 <div class="current-logo">
                                                     <p class="mb-1"><strong>Current Logo:</strong></p>
                                                     <div class="preview-container">
-                                                        <img src="{{ asset($setting->logo) }}" alt="Company Logo" class="img-thumbnail" style="max-height: 150px; max-width: 100%;">
-                                                        <p class="text-muted small mt-1">{{ basename($setting->logo) }}</p>
+                                                        <img src="{{ asset(@$generel_settings->logo) }}" alt="Company Logo" class="img-thumbnail" style="max-height: 150px; max-width: 100%;">
+                                                        <p class="text-muted small mt-1">{{ basename(@$generel_settings->logo) }}</p>
                                                     </div>
                                                 </div>
                                             @else
@@ -139,16 +177,16 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
 
 
 
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary">
+                        <div class="form-group mt-5 text-center">
+                            <button type="submit" class="btn btn-lg btn-primary px-5 ">
                                 <i class="fas fa-save"></i> Save Settings
                             </button>
-                            <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">
+                            <a href="{{ route('admin.dashboard') }}" class="btn btn-lg btn-secondary px-5">
                                 <i class="fas fa-arrow-left"></i> Back
                             </a>
                         </div>
@@ -167,5 +205,61 @@
     $('#settings-sidebar').addClass('active');
     $('#gsettings-index-sidebar').addClass('active');
     $('#collapseSettings').addClass('show');
+
+    var photoUploadArea = document.getElementById('photoUploadArea');
+        var photoInput = document.getElementById('photoInput');
+        var photoPreview = document.getElementById('photoPreview');
+
+        if (photoUploadArea && photoInput) {
+            photoUploadArea.onclick = function(e) {
+                if (e.target === photoInput) return;
+                e.preventDefault();
+                e.stopPropagation();
+                photoInput.click();
+            };
+
+            photoInput.onchange = function(e) {
+                var file = this.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        photoPreview.src = e.target.result;
+                        photoPreview.classList.remove('d-none');
+
+                        var icon = photoUploadArea.querySelector('i');
+                        var text = photoUploadArea.querySelector('p');
+                        if (icon) icon.style.display = 'none';
+                        if (text) text.style.display = 'none';
+                    }
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            // Drag and drop
+            photoUploadArea.ondragover = function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#28a745';
+                this.style.backgroundColor = '#f1f3f5';
+            };
+
+            photoUploadArea.ondragleave = function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#dee2e6';
+                this.style.backgroundColor = '#f8f9fa';
+            };
+
+            photoUploadArea.ondrop = function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#dee2e6';
+                this.style.backgroundColor = '#f8f9fa';
+
+                var files = e.dataTransfer.files;
+                if (files.length) {
+                    photoInput.files = files;
+                    var event = new Event('change', { bubbles: true });
+                    photoInput.dispatchEvent(event);
+                }
+            };
+        }
 </script>
 @endsection

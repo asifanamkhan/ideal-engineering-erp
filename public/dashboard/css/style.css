@@ -1,6 +1,7 @@
 
 .table-head {
     background: linear-gradient(135deg, #28a745 0%, #00ac79 100%);
+    /* background: #1CC88A; */
     /* background: linear-gradient(135deg, #28ACE2 0%, #1E88E5 100%); */
     color: white;
     text-transform: uppercase;
@@ -32,7 +33,7 @@
 }
 
 .status-active {
-    color: #28a745;
+    color: #1CC88A;
     font-weight: bold;
 }
 
@@ -53,7 +54,7 @@
 }
 
 .modal-header {
-    background: forestgreen;
+    background: #1CC88A;
     color: white;
 }
 .modal-header .close {

@@ -9,17 +9,17 @@ use App\Http\Controllers\Admin\Settings\GenerelSettingController;
 use App\Http\Controllers\Admin\Settings\BranchController;
 use App\Http\Controllers\Admin\Settings\RolesController;
 use App\Http\Controllers\Admin\Settings\UserController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__ . '/auth.php';
-Route::get('/', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified']);
+Route::get('/', [DashboardController::class, 'index'])
+        ->middleware(['auth', 'verified']);
 
-Route::get('admin/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('admin.dashboard');
+Route::get('admin/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('admin.dashboard');
 
 Route::get('/employee-register', [CandidateRegisterController::class, 'showRegistrationForm'])->name('employee.register');
 Route::post('/employee-register', [CandidateRegisterController::class, 'register'])->name('employee.store');

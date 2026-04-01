@@ -13,12 +13,12 @@
     <div class="page-header">
         <div class="d-flex align-items-center justify-content-between">
             <div>
-                <h4 class="mb-1"><i class="fas fa-bolt "></i> All Roles List</h4>
+                <h4 class="mb-1"><i class="fa fa-user"></i> All Roles List</h4>
             </div>
 
             <div>
-                <a href="{{ route('admin.roles.create') }}" class="btn btn-primary btn-sm" id="addNewPart">
-                    <i class="fas fa-arrow-plus "></i>Add New Role
+                <a href="{{ route('admin.roles.create') }}" class="btn btn-primary shadow-sm px-5" id="addNewPart">
+                    <i class="fas fa-plus"></i> Add New Role
                 </a>
             </div>
         </div>

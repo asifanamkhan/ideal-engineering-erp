@@ -13,7 +13,7 @@
                 <p class="text-muted mb-0">Editing role: <strong>{{ $role->name }}</strong></p>
             </div>
             <div>
-                <a href="{{ route('admin.roles.index') }}" class="btn btn-secondary btn-sm">
+                <a href="{{ route('admin.roles.index') }}" class="btn btn-primary btn shadow-sm px-5">
                     <i class="fas fa-arrow-left"></i> Back to Roles
                 </a>
             </div>
@@ -48,7 +48,7 @@
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <label class="form-label fw-bold mb-0">Permissions</label>
                                 <div class="global-select-all">
-                                    <button type="button" class="global-select-all-btn" id="selectAllModules">
+                                    <button type="button" class="global-select-all-btn btn" id="selectAllModules">
                                         <i class="fas fa-check-double"></i> Select All Modules
                                     </button>
                                 </div>
@@ -57,7 +57,7 @@
                             @foreach($modules as $module)
                                 <div class="permission-card">
                                     <div class="module-title">
-                                        <h6>{{ ucfirst($module->name) }}</h6>
+                                        <h5>{{ ucfirst($module->name) }}</h5>
                                         <button type="button" class="select-all-btn" data-module="{{ $module->id }}">
                                             Select All
                                         </button>

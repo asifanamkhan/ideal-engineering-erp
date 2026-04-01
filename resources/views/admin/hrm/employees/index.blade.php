@@ -42,8 +42,8 @@
             </div>
             <span class="breadcrumb-item">Dashboard / employees</span>
             <div>
-                <a href="{{ route('admin.employees.create') }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus me-2"></i> Add new employee
+                <a href="{{ route('admin.employees.create') }}" class="btn btn-primary shadow-sm px-5">
+                    <i class="fas fa-plus "></i> Add new employee
                 </a>
             </div>
         </div>

@@ -14,8 +14,7 @@ class GenerelSettingController extends Controller
      */
     public function index()
     {
-        $setting = DB::table('generel_settings')->first();
-        return view('admin.settings.generel_settings.edit', compact('setting'));
+        return view('admin.settings.generel_settings.edit');
     }
 
     /**
@@ -40,11 +39,27 @@ class GenerelSettingController extends Controller
             'updated_at' => now(),
         ];
 
-        if ($request->hasFile('logo')) {
-            $imageName = time().'.'.$request->logo->extension();
-            $request->logo->move(public_path('uploads/logo'), $imageName);
-            $data['logo'] = 'public/uploads/logo/'.$imageName;
+        $generel_settings = DB::table('generel_settings')->where('id', 1)->first();
+        // Handle photo upload
+        $photoPath = @$generel_settings->logo ?? '';
+
+        if ($request->hasFile('logo') && $request->file('logo')->isValid()) {
+            try {
+                // Delete old photo if exists
+                if ($request->photo && file_exists(public_path($request->photo))) {
+                    unlink(public_path($request->photo));
+                }
+
+                $photoFile = $request->file('logo');
+                $filename = time() . '_' . uniqid() . '.' . $photoFile->getClientOriginalExtension();
+                $photoPath = 'public/uploads/logo/' . $filename;
+                $photoFile->move(public_path('uploads/logo'), $filename);
+            } catch (\Exception $e) {
+                $photoPath = $request->logo; // Keep old photo on error
+            }
         }
+
+        $data['logo'] = $photoPath;
 
         DB::table('generel_settings')->updateOrInsert(
             ['id' => 1],

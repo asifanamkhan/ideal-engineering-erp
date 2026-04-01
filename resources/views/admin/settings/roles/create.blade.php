@@ -9,10 +9,10 @@
     <div class="page-header">
         <div class="d-flex align-items-center justify-content-between">
             <div>
-                <h4 class="mb-1"><i class="fas fa-bolt"></i> Create New Role</h4>
+                <h4 class="mb-1"><i class="fas fa-user"></i> Create New Role</h4>
             </div>
             <div>
-                <a href="{{ route('admin.roles.index') }}" class="btn btn-secondary btn-sm">
+                <a href="{{ route('admin.roles.index') }}" class="btn px-5 btn-primary shadow-sm btn">
                     <i class="fas fa-arrow-left"></i> Back to Roles
                 </a>
             </div>
@@ -111,7 +111,7 @@
     $('#settings-sidebar').addClass('active');
     $('#roles-index-sidebar').addClass('active');
     $('#collapseSettings').addClass('show');
-    
+
     $(document).ready(function() {
         // Global Select All Modules functionality
         $('#selectAllModules').on('click', function() {

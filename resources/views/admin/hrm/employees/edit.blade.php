@@ -21,10 +21,10 @@
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h4 class="mb-1"><i class="fas fa-edit me-2"></i> Edit Employee</h4>
-                <p class="mb-0 opacity-75 small">Edit employee: {{ $employee->name }} ({{ $employee->employee_id }})</p>
+                <p class="mb-0 opacity-75 small"> Edit employee: {{ $employee->name }} ({{ $employee->employee_id }})</p>
             </div>
             <div>
-                <a href="{{ route('admin.employees.index') }}" class="btn btn-primary">
+                <a href="{{ route('admin.employees.index') }}" class="btn btn-primary shadow-sm px-5">
                     <i class="fas fa-arrow-left me-2"></i> Back to List
                 </a>
             </div>
@@ -280,14 +280,14 @@
                 <!-- Form Actions -->
                 <hr>
                 <div class="d-flex justify-content-center gap-2 mt-4" style="gap: 10px">
-                    <button type="submit" class="btn btn-success btn-submit" id="submitBtn">
-                        <i class="fas fa-save me-2"></i>Update Employee
+                    <button type="submit" class="btn btn-lg btn-success btn-submit" id="submitBtn">
+                        <i class="fas fa-save me-2"></i> Update Employee
                     </button>
-                    <button type="reset" class="btn btn-primary btn-reset">
-                        <i class="fas fa-undo me-2"></i>Reset
+                    <button type="reset" class="btn btn-lg btn-primary btn-reset">
+                        <i class="fas fa-undo me-2"></i> Reset
                     </button>
-                    <a href="{{ route('admin.employees.index') }}" class="btn btn-danger btn-cancel">
-                        <i class="fas fa-times me-2"></i>Cancel
+                    <a href="{{ route('admin.employees.index') }}" class="btn btn-lg btn-danger btn-cancel">
+                        <i class="fas fa-times me-2"></i> Cancel
                     </a>
                 </div>
 
@@ -300,9 +300,8 @@
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Activate sidebar
-    $('#candidate-sidebar, #candidate-create-sidebar').addClass('active');
-    $('#collapseCandidate').addClass('show');
+    $('#hrm-sidebar, #employee-index-sidebar').addClass('active');
+    $('#collapseHRM').addClass('show');
 
     $(document).ready(function() {
         // PHOTO UPLOAD

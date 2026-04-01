@@ -11,7 +11,7 @@
     }
 
     .module-title {
-        padding: 15px 20px;
+        padding: 8px 20px;
         border-bottom: 1px solid #e0e0e0;
         background-color: #f8f9fa;
         border-radius: 8px 8px 0 0;
@@ -22,7 +22,7 @@
         justify-content: space-between;
     }
 
-    .module-title h6 {
+    .module-title h5 {
         margin: 0;
         font-weight: 600;
         color: #333;
@@ -30,17 +30,17 @@
 
     .select-all-btn {
         font-size: 12px;
-        padding: 4px 12px;
+        padding: 6px 12px;
         cursor: pointer;
-        color: #007bff;
+        color: #4E73DF;
         background: none;
-        border: 1px solid #007bff;
+        border: 1px solid #4E73DF;
         border-radius: 4px;
         transition: all 0.2s;
     }
 
     .select-all-btn:hover {
-        background-color: #007bff;
+        background-color: #4E73DF;
         color: white;
     }
 
@@ -108,11 +108,11 @@
     }
 
     input:checked + .slider {
-        background-color: #2196F3;
+        background-color: #4E73DF;
     }
 
     input:focus + .slider {
-        box-shadow: 0 0 1px #2196F3;
+        box-shadow: 0 0 1px #4E73DF;
     }
 
     input:checked + .slider:before {

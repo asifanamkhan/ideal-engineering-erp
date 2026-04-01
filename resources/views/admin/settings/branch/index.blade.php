@@ -8,13 +8,20 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-3">
-        <h1 class="h3 mb-0 text-gray-800">Branch Management</h1>
-        <button type="button" class="btn btn-primary shadow-sm" data-toggle="modal" data-target="#addBranchModal">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Add New Branch
-        </button>
+    <div class="page-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h4 class="mb-1"><i class="fas fa-building "></i> Branch</h4>
+            </div>
+
+            <div>
+                <button data-toggle="modal" data-target="#addBranchModal" href="#" class="btn shadow-sm btn-primary btn px-5" id="addNewPart">
+                    <i class="fas fa-plus"></i> Add New Branch
+                </button>
+            </div>
+        </div>
     </div>
+
 
     @if(Session::has('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

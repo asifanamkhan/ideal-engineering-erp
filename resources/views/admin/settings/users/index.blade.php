@@ -44,7 +44,7 @@
                 <h4 class="mb-1"><i class="fas fa-users"></i> All Users List</h4>
             </div>
             <div>
-                <a href="#" class="btn btn-primary btn-sm" id="addNewUser">
+                <a href="#" class="btn btn-primary shadow-sm btn px-5" id="addNewUser">
                     <i class="fas fa-plus"></i> Add New User
                 </a>
             </div>
