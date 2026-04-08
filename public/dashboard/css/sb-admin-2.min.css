@@ -4259,7 +4259,7 @@ input[type="submit"].btn-block {
     margin-left: 1.25rem;
 }
 .card-header {
-    padding: 0.75rem 1.25rem;
+    padding: 0.55rem 1.25rem;
     margin-bottom: 0;
     background-color: #f8f9fc;
     border-bottom: 1px solid #e3e6f0;
@@ -9881,6 +9881,7 @@ a:focus {
 .btn-icon-split.btn-lg .icon {
     padding: 0.5rem 1rem;
 }
+
 .btn-group-lg > .btn-icon-split.btn .text,
 .btn-icon-split.btn-lg .text {
     padding: 0.5rem 1rem;

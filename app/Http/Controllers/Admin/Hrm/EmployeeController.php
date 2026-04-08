@@ -456,4 +456,106 @@ class EmployeeController extends Controller
             'pagination' => ['more' => false]
         ]);
     }
+
+    public function salary_info()
+    {
+        $employees = DB::table('employees')
+            ->where('employees.status', 1)
+            ->leftJoin('designations', 'employees.designation_id', '=', 'designations.id')
+            ->get(['employees.*', 'designations.name as designation_name']);
+        return view('admin.hrm.employees.salary-info', compact('employees'));
+    }
+    public function getDetails(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'employee_id' => 'required|exists:employees,id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => 'Invalid employee selected'], 422);
+        }
+
+        try {
+            // Get employee details with salary fields from employees table
+            $employee = DB::table('employees')
+                ->leftJoin('designations', 'employees.designation_id', '=', 'designations.id')
+                ->leftJoin('branches', 'employees.branch_id', '=', 'branches.id')
+                ->select([
+                    'employees.*',
+                    'designations.name as designation_name',
+                    'branches.name as branch_name'
+                ])
+                ->where('employees.id', $request->employee_id)
+                ->first();
+
+            if (!$employee) {
+                return response()->json(['error' => 'Employee not found'], 404);
+            }
+
+            // Render partial views
+            $detailsHtml = view('admin.hrm.employees.partials.employee-details', compact('employee'))->render();
+            $formHtml = view('admin.hrm.employees.partials.salary-form', compact('employee'))->render();
+
+            return response()->json([
+                'success' => true,
+                'details_html' => $detailsHtml,
+                'form_html' => $formHtml
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to load employee data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function saveSalary(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'employee_id' => 'required|exists:employees,id',
+            'basic_salary' => 'required|numeric|min:0',
+            'total_allowance' => 'nullable|numeric|min:0',
+            'total_deduction' => 'nullable|numeric|min:0',
+            'overtime_rate' => 'nullable|numeric|min:0',
+            'effective_date' => 'nullable|date'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $basicSalary = $request->basic_salary;
+            $totalAllowance = $request->total_allowance ?? 0;
+            $totalDeduction = $request->total_deduction ?? 0;
+            $overtimeRate = $request->overtime_rate ?? 0;
+
+            // Calculate gross salary
+            $grossSalary = $basicSalary + $totalAllowance - $totalDeduction;
+
+            // Update employee record with salary information
+            $updateData = [
+                'basic_salary' => $basicSalary,
+                'total_allowance' => $totalAllowance,
+                'total_deduction' => $totalDeduction,
+                'overtime_rate' => $overtimeRate,
+                'gross_salary' => $grossSalary,
+                // 'salary_effective_date' => $request->effective_date ?? date('Y-m-d'),
+                'updated_at' => now()
+            ];
+
+            DB::table('employees')
+                ->where('id', $request->employee_id)
+                ->update($updateData);
+
+            // Get the updated employee data
+            $updatedEmployee = DB::table('employees')->where('id', $request->employee_id)->first();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Salary information saved successfully!',
+                'gross_salary' => $grossSalary,
+                'employee' => $updatedEmployee
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to save salary information: ' . $e->getMessage()], 500);
+        }
+    }
 }

@@ -23,7 +23,7 @@ class PartsController extends Controller
                     return $part->id;
                 })
                 ->addColumn('price', function ($part) {
-                    return $part->price ? '৳' . number_format($part->price, 2) : 'N/A';
+                    return $part->price ? number_format($part->price, 2) : 'N/A';
                 })
                 ->addColumn('status_badge', function ($part) {
                     $status = $part->status == 1 ? 'active' : 'inactive';
@@ -45,25 +45,52 @@ class PartsController extends Controller
         return view('admin.settings.parts.partials.create-modal');
     }
 
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:191', 'unique:parts'],
-            'price' => ['nullable', 'numeric'],
-            'status' => ['nullable', 'in:0,1'],
-            'description' => ['nullable', 'string'],
+            'name' => 'required|string|max:255|unique:parts',
+            'price' => 'nullable|numeric|min:0',
+            'brand' => 'nullable|string|max:100',
+            'model' => 'nullable|string|max:100',
+            'status' => 'nullable|boolean',
+            'description' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $data = $request->all();
-        $data['status'] = $request->status ?? 1;
+        try {
+            $insertedId = DB::table('parts')->insertGetId([
+                'name' => $request->name,
+                'price' => $request->price ?? 0,
+                'brand' => $request->brand,
+                'model' => $request->model,
+                'status' => $request->status ?? 1,
+                'description' => $request->description,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-        Parts::create($data);
+            // Fetch the created part data
+            $part = DB::table('parts')->where('id', $insertedId)->first();
 
-        return response()->json(['success' => true, 'message' => 'Part created successfully!']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Part created successfully!',
+                'part' => [
+                    'id' => $part->id,
+                    'name' => $part->name,
+                    'brand' => $part->brand,
+                    'model' => $part->model,
+                    'price' => $part->price
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to create part: ' . $e->getMessage()], 500);
+        }
     }
 
     public function edit($id)

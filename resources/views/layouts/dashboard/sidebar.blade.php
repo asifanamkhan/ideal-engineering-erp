@@ -24,22 +24,64 @@
     <li class="nav-item" id="settings-sidebar">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="true"
             aria-controls="collapseTwo">
-            <i class="fas fa-users"></i>
+            <i class="fas fa-cog"></i>
             <span>Settings</span>
         </a>
         <div id="collapseSettings" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="py-2 collapse-inner rounded">
                 <a class="collapse-item" id="gsettings-index-sidebar" href="{{ route('admin.general-settings.index') }}">General settings</a>
                 <a class="collapse-item" id="branch-index-sidebar" href="{{ route('admin.branches.index') }}">Branch</a>
-                <a class="collapse-item" id="users-index-sidebar" href="{{ route('admin.users.index') }}">Users</a>
-                <a class="collapse-item" id="roles-index-sidebar" href="{{ route('admin.roles.index') }}">Roles</a>
+                <a class="collapse-item" id="units-index-sidebar" href="{{ route('admin.units.index') }}">Units</a>
+                <a class="collapse-item" id="sizes-index-sidebar" href="{{ route('admin.sizes.index') }}">Sizes</a>
                 <a class="collapse-item" id="parts-index-sidebar" href="{{ route('admin.parts.index') }}">Parts</a>
                 @can('view_tests')
-                <a class="collapse-item" id="employee-create-sidebar" href="{{ route('admin.employees.create') }}">Service</a>
+                <a class="collapse-item" id="services-index-sidebar" href="{{ route('admin.services.index') }}">Services</a>
+
                 @endcan
             </div>
         </div>
     </li>
+    <li class="nav-item" id="user-management-sidebar">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUserManagement" aria-expanded="true"
+            aria-controls="collapseTwo">
+            <i class="fas fa-user"></i>
+            <span>User Management</span>
+        </a>
+        <div id="collapseUserManagement" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="py-2 collapse-inner rounded">
+                <a class="collapse-item" id="users-index-sidebar" href="{{ route('admin.users.index') }}">Users</a>
+                <a class="collapse-item" id="roles-index-sidebar" href="{{ route('admin.roles.index') }}">Roles</a>
+            </div>
+        </div>
+    </li>
+    <li class="nav-item" id="contacts-sidebar">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseContacts" aria-expanded="true"
+            aria-controls="collapseTwo">
+            <i class="fas fa-address-card"></i>
+            <span>Contacts</span>
+        </a>
+        <div id="collapseContacts" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="py-2 collapse-inner rounded">
+                <a class="collapse-item" id="customers-index-sidebar" href="{{ route('admin.customers.index') }}">Customers</a>
+                <a class="collapse-item" id="suppliers-index-sidebar" href="{{ route('admin.suppliers.index') }}">Suppliers</a>
+            </div>
+        </div>
+    </li>
+    <li class="nav-item" id="jobs-sidebar">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseJobs" aria-expanded="true"
+            aria-controls="collapseTwo">
+            <i class="fas fa-address-card"></i>
+            <span>Jobs</span>
+        </a>
+        <div id="collapseJobs" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="py-2 collapse-inner rounded">
+                <a class="collapse-item" id="jobs-index-sidebar" href="{{ route('admin.job-books.index') }}">Job lists</a>
+                <a class="collapse-item" id="quotations-index-sidebar" href="{{ route('admin.job-quotations.create') }}">Quotetions</a>
+                <a class="collapse-item" id="invoices-index-sidebar" href="{{ route('admin.job-invoices.create') }}">Invoices</a>
+            </div>
+        </div>
+    </li>
+
     <li class="nav-item" id="hrm-sidebar"">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRM" aria-expanded="true"
             aria-controls="collapseTwo">
@@ -55,74 +97,50 @@
             </div>
         </div>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Customers</span></a>
+
+    <li class="nav-item" id="hrm-sidebar"">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRM" aria-expanded="true"
+            aria-controls="collapseTwo">
+            <i class="fas fa-users"></i>
+            <span>Expenses</span>
+        </a>
+        <div id="collapseHRM" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="py-2 collapse-inner rounded">
+                <a class="collapse-item" id="designations-index-sidebar" href="{{ route('admin.designations.index') }}">Designation</a>
+                <a class="collapse-item" id="employee-index-sidebar" href="{{ route('admin.employees.index') }}">Employee</a>
+                <a class="collapse-item" id="employee-salary-info-sidebar" href="{{ route('admin.employees.salary-info') }}">Salary Information</a>
+
+            </div>
+        </div>
     </li>
-    {{-- <li class="nav-item">
-        <a class="nav-link" href="{{ route('dashboard') }}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Jobs</span></a>
-    </li> --}}
-    {{-- <li class="nav-item">
-        <a class="nav-link" href="{{ route('dashboard') }}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Quotations</span></a>
-    </li> --}}
-    {{-- <li class="nav-item" id="employee-sidebar"">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseemployee" aria-expanded="true"
+    <li class="nav-item" id="hrm-sidebar"">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRM" aria-expanded="true"
             aria-controls="collapseTwo">
             <i class="fas fa-users"></i>
-            <span>employees</span>
+            <span>Reports</span>
         </a>
-        <div id="collapseemployee" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div id="collapseHRM" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="py-2 collapse-inner rounded">
-                <a class="collapse-item" id="employee-index-sidebar" href="{{ route('employees.index') }}">employee List</a>
-                <a class="collapse-item" id="employee-create-sidebar" href="{{ route('employees.create') }}">New employees</a>
+                <a class="collapse-item" id="designations-index-sidebar" href="{{ route('admin.designations.index') }}">Designation</a>
+                <a class="collapse-item" id="employee-index-sidebar" href="{{ route('admin.employees.index') }}">Employee</a>
+                <a class="collapse-item" id="employee-salary-info-sidebar" href="{{ route('admin.employees.salary-info') }}">Salary Information</a>
+
             </div>
         </div>
-    </li> --}}
-
-    {{-- <li class="nav-item" id="employee-sidebar"">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseExam" aria-expanded="true"
+    </li>
+    <li class="nav-item" id="hrm-sidebar"">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseHRM" aria-expanded="true"
             aria-controls="collapseTwo">
             <i class="fas fa-users"></i>
-            <span>Exam</span>
+            <span>Accounts</span>
         </a>
-        <div id="collapseExam" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div id="collapseHRM" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
             <div class="py-2 collapse-inner rounded">
-                <a class="collapse-item" id="employee-index-sidebar" href="{{ route('exams.index') }}">Exam List</a>
-                <a class="collapse-item" id="employee-create-sidebar" href="{{ route('exam.start') }}">New Exam</a>
+                <a class="collapse-item" id="designations-index-sidebar" href="{{ route('admin.designations.index') }}">Designation</a>
+                <a class="collapse-item" id="employee-index-sidebar" href="{{ route('admin.employees.index') }}">Employee</a>
+                <a class="collapse-item" id="employee-salary-info-sidebar" href="{{ route('admin.employees.salary-info') }}">Salary Information</a>
+
             </div>
         </div>
-    </li> --}}
-
-    {{-- <li class="nav-item" id="job-sidebar">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseJob" aria-expanded="true"
-            aria-controls="collapseTwo">
-            <i class="fas fa-fw fa-cog"></i>
-            <span>Job Posts</span>
-        </a>
-        <div id="collapseJob" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-            <div class="py-2 collapse-inner rounded">
-                <a class="collapse-item" id="job-index-sidebar" href="{{ route('job-posts.index') }}">Job List</a>
-                <a class="collapse-item" id="job-create-sidebar" href="{{ route('job-posts.create') }}">New Job Post</a>
-            </div>
-        </div>
-    </li> --}}
-
-    {{-- <li class="nav-item" id="settings-sidebar">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSettings" aria-expanded="true"
-            aria-controls="collapseTwo">
-            <i class="fas fa-fw fa-cog"></i>
-            <span>Settings</span>
-        </a>
-        <div id="collapseSettings" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-            <div class="py-2 collapse-inner rounded">
-                <a class="collapse-item" id="department-index-sidebar" href="{{ route('departments.index') }}">Departments</a>
-            </div>
-        </div>
-    </li> --}}
-
+    </li>
 </ul>
