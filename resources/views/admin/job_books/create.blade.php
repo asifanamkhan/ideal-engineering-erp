@@ -90,88 +90,88 @@
         <!-- Main Card -->
         <div class="card shadow">
             <div class="card-body">
-                <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i> Job Information</h5>
-
+                <h5 class="mb-1"><i class="fas fa-info-circle me-2"></i> Job Information</h5>
                 <div class="row">
+                    <div class="col-md-8 row">
+                        <div class="col-md-6">
+                            <div class="mb-1">
+                                <label class="form-label fw-bold">Customer <span class="text-danger">*</span></label>
+                                <div class="d-flex gap-2">
 
-                    <div class="col-md-6">
-
-                        <!-- Customer Field with Plus Button Beside -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Customer <span class="text-danger">*</span></label>
-                            <div class="d-flex gap-2">
-
-                                <select name="customer_id" id="customer_id" class="form-control" style="flex: 1;"
+                                    <select name="customer_id" id="customer_id" class="form-control" style="flex: 1;"
+                                        required>
+                                        <option value="">Search and select customer...</option>
+                                    </select>
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                        data-bs-target="#customerModal" style="white-space: nowrap;">
+                                        <i class="fas fa-plus-circle me-1"></i> New
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Job Date -->
+                            <div class="mb-1">
+                                <label class="form-label fw-bold">Job Date <span class="text-danger">*</span></label>
+                                <input type="date" name="job_date" class="form-control" value="{{ date('Y-m-d') }}"
                                     required>
-                                    <option value="">Search and select customer...</option>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Delivery Date (Default Today) -->
+                            <div class="mb-1">
+                                <label class="form-label fw-bold">Delivery Date</label>
+                                <input type="date" name="delivery_date" class="form-control" value="{{ date('Y-m-d') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Engine -->
+                            <div class="mb-1">
+                                <label class="form-label fw-bold">Engine</label>
+                                <input type="text" name="engine" class="form-control" placeholder="Enter engine details">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-1">
+                                <label class="form-label fw-bold">Job Status</label>
+                                <select name="job_status" class="form-control">
+                                    <option value="pending">Pending</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="cancelled">Cancelled</option>
                                 </select>
-                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                    data-bs-target="#customerModal" style="white-space: nowrap;">
-                                    <i class="fas fa-plus-circle me-1"></i> New
-                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-1">
+                                <label class="form-label fw-bold">Documents</label>
+                                <input type="file" name="documents" class="form-control">
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <!-- Job Date -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Job Date <span class="text-danger">*</span></label>
-                            <input type="date" name="job_date" class="form-control" value="{{ date('Y-m-d') }}"
-                                required>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <!-- Delivery Date (Default Today) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Delivery Date</label>
-                            <input type="date" name="delivery_date" class="form-control" value="{{ date('Y-m-d') }}">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <!-- Engine -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Engine</label>
-                            <input type="text" name="engine" class="form-control" placeholder="Enter engine details">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Job Status</label>
-                            <select name="job_status" class="form-control">
-                                <option value="pending">Pending</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
-                        </div>
-                    </div>
+                    <div class="col-md-4 row">
+                        <div class="col-md-12">
 
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Documents</label>
-                            <input type="file" name="documents" class="form-control">
+                            <!-- Assign To (Multiple) -->
+                            <div class="mb-1">
+                                <label class="form-label fw-bold">Assign To</label>
+                                <select name="assign_to[]" id="assign_to" class="form-control" multiple>
+                                    @foreach($employees as $employee)
+                                    <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">You can select multiple employees</small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-12">
+                        <div class="col-md-12">
+                            <div class="mb-1">
+                                <label class="form-label fw-bold">Descriptions</label>
+                                <textarea name="descriptions" class="form-control" rows="4"
+                                    placeholder="Enter job descriptions..."></textarea>
+                            </div>
 
-                        <!-- Assign To (Multiple) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Assign To</label>
-                            <select name="assign_to[]" id="assign_to" class="form-control" multiple>
-                                @foreach($employees as $employee)
-                                <option value="{{ $employee->id }}">{{ $employee->name }}</option>
-                                @endforeach
-                            </select>
-                            <small class="text-muted">You can select multiple employees</small>
                         </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Descriptions</label>
-                            <textarea name="descriptions" class="form-control" rows="4"
-                                placeholder="Enter job descriptions..."></textarea>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -184,7 +184,7 @@
             </div>
             <div class="card-body">
                 <!-- Add Part Row - 3 columns with plus button -->
-                <div class="row mb-3 align-items-end">
+                <div class="row mb-1 align-items-end">
                     <div class="col-md-6 ">
                         <label class="form-label fw-bold">Select Part <span class="text-danger">*</span></label>
                         <div class="d-flex gap-2">
@@ -208,7 +208,10 @@
                         <label class="form-label fw-bold">Size <span class="text-danger">*</span></label>
                         <select id="size_id" class="form-control">
                             @foreach($sizes as $size)
-                                <option value="{{ $size->id }}"> {{ $size->name }} </option>
+                                <option
+                                @if ($size->is_default == 1)
+                                    selected
+                                @endif value="{{ $size->id }}"> {{ $size->name }} </option>
                             @endforeach
                         </select>
                     </div>
@@ -224,8 +227,8 @@
 
                 <!-- Parts Table (Compact) -->
                 <div class="table-responsive mt-3">
-                    <table class="table table-bordered compact-table" id="partsTable">
-                        <thead class="table-light">
+                    <table class="table table-sm table-bordered compact-table" id="partsTable">
+                        <thead class="table-head">
                             <tr>
                                 <th width="5%">#</th>
                                 <th width="35%">Part Details</th>
@@ -309,31 +312,31 @@
 
                     <input type="hidden" id="part_id" name="part_id">
 
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="name" name="name" required>
                         <div class="invalid-feedback"></div>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="price" class="form-label">Price (per unit/size)</label>
                         <input type="number" step="0.01" class="form-control" id="price" name="price">
                         <div class="invalid-feedback"></div>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="brand" class="form-label">Brand name</label>
                         <input type="text" class="form-control" id="brand" name="brand">
                         <div class="invalid-feedback"></div>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="model" class="form-label">Model name</label>
                         <input type="text" class="form-control" id="model" name="model">
                         <div class="invalid-feedback"></div>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="status" class="form-label">Status</label>
                         <select class="form-control" id="status" name="status">
                             <option value="1">Active</option>
@@ -341,7 +344,7 @@
                         </select>
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-1">
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                         <div class="invalid-feedback"></div>
@@ -656,7 +659,6 @@ $('#partForm').submit(function(e) {
 
         // Reset selection
         $('#part_id').val('').trigger('change');
-        $('#size_id').val('1').trigger('change');
     });
 
     // Render Parts Table
@@ -682,7 +684,7 @@ $('#partForm').submit(function(e) {
                     </td>
                     <td>${part.size_name}</td>
                     <td>
-                        <input type="number" step="0.01" class="form-control price-input" data-index="${index}" value="${part.price.toFixed(2)}" style="width: 100px;">
+                        <input type="number" step="0.01" class="form-control form-control-sm  price-input" data-index="${index}" value="${part.price.toFixed(2)}" style="width: 100px;">
                     </td>
                     <td>
                         <input type="number" class="form-control qty-input" data-index="${index}" value="${part.quantity}" min="1" style="width: 70px;">

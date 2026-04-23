@@ -27,10 +27,15 @@ class SizeController extends Controller
                     $badgeClass = $status === 'active' ? 'badge bg-success' : 'badge bg-danger';
                     return '<span class="' . $badgeClass . '">' . ucfirst($status) . '</span>';
                 })
+                ->addColumn('is_default', function ($unit) {
+                    $status = $unit->is_default == 1 ? 'Yes' : '';
+                    $badgeClass = $status === 'Yes' ? 'badge bg-primary' : ' ';
+                    return '<span class="' . $badgeClass . '">' . ucfirst($status) . '</span>';
+                })
                 ->addColumn('action', function ($size) {
                     return view('admin.settings.sizes.partials.action-btn-view', ['id' => $size->id])->render();
                 })
-                ->rawColumns(['status_badge', 'action'])
+                ->rawColumns(['status_badge','is_default', 'action'])
                 ->make(true);
         }
 
@@ -59,6 +64,11 @@ class SizeController extends Controller
         $data['status'] = $request->status ?? 1;
 
         Size::create($data);
+        if($data['is_default'] == 1){
+            DB::table('sizes')
+                ->where('id', '!=', $data['id'])
+                ->update(['is_default' => 0]);
+        }
 
         return response()->json(['success' => true, 'message' => 'Size created successfully!']);
     }
@@ -73,7 +83,8 @@ class SizeController extends Controller
                 'name' => $size->name,
                 'price' => $size->price,
                 'status' => $size->status,
-                'description' => $size->description
+                'description' => $size->description,
+                'is_default' => $size->is_default
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Size not found'], 404);
@@ -91,6 +102,7 @@ class SizeController extends Controller
             ],
             'price' => ['nullable', 'numeric'],
             'status' => ['nullable', 'in:0,1'],
+            'is_default' => ['nullable', 'in:0,1'],
             'description' => ['nullable', 'string'],
         ]);
 
@@ -104,6 +116,12 @@ class SizeController extends Controller
             $data['status'] = $request->status ?? $size->status;
 
             $size->update($data);
+
+            if($data['is_default'] == 1){
+                DB::table('sizes')
+                    ->where('id', '!=', $id)
+                    ->update(['is_default' => 0]);
+            }
 
             return response()->json(['success' => true, 'message' => 'Size updated successfully!']);
         } catch (\Exception $e) {

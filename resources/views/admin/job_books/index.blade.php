@@ -32,7 +32,6 @@
     .avatar-danger {
         background-color: #e74a3b;
     }
-
     .badge {
         padding: 5px 10px;
         font-weight: 500;
@@ -40,41 +39,6 @@
         align-items: center;
         gap: 5px;
     }
-
-    .badge.bg-info {
-        background-color: #36b9cc !important;
-        color: white;
-    }
-
-    .badge.bg-success {
-        background-color: #1cc88a !important;
-        color: white;
-    }
-
-    .badge.bg-secondary {
-        background-color: #858796 !important;
-        color: white;
-    }
-
-    .badge.bg-warning {
-        background-color: #f6c23e !important;
-        color: #212529;
-    }
-
-    .badge.bg-primary {
-        background-color: #4e73df !important;
-        color: white;
-    }
-
-    .badge.bg-danger {
-        background-color: #e74a3b !important;
-        color: white;
-    }
-
-    .gap-1 {
-        gap: 0.25rem;
-    }
-
     .customer-info,
     .date-info {
         line-height: 1.5;
@@ -82,6 +46,28 @@
 
     .table td {
         vertical-align: middle;
+    }
+
+    .print-option {
+        width: 18px;
+        height: 18px;
+    }
+
+    .dynamic-fields {
+    margin-top: 15px;
+}
+
+    #paymentModal .card {
+        margin-bottom: 0;
+    }
+
+    #paymentModal .modal-header.bg-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%) !important;
+    }
+
+    #payment_amount {
+        font-size: 18px;
+        font-weight: bold;
     }
 </style>
 @endsection
@@ -111,15 +97,14 @@
                 <table class="table table-sm" id="jobs-table" width="100%" cellspacing="0">
                     <thead class="table-head">
                         <tr>
-                            <th width="3%">#</th>
+                            <th width="4%">#</th>
                             <th width="8%">Job ID</th>
-                            <th width="20%">Customer</th>
-                            <th width="14%">Date</th>
+                            <th width="18%">Customer</th>
+                            <th width="15%">Date</th>
                             <th width="8%">Engine</th>
-                            <th width="8%">Status</th>
-                            <th width="8%">Parts</th>
-                            <th width="11%">Quotation</th>
-                            <th width="11%">Invoice</th>
+                            <th width="14%">Status</th>
+                            <th width="14%">Quotation</th>
+                            <th width="14%">Invoice</th>
                             <th width="5%">Actions</th>
                         </tr>
                     </thead>
@@ -154,35 +139,53 @@
     </div>
 </div>
 
-<!-- View Job Modal -->
-<div class="modal fade" id="viewJobModal" tabindex="-1" role="dialog" aria-labelledby="viewJobModalLabel"
+<!-- Print Options Modal -->
+<div class="modal fade" id="printOptionsModal" tabindex="-1" role="dialog" aria-labelledby="printOptionsModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title text-white" id="viewJobModalLabel">
-                    <i class="fas fa-book-open"></i> Job Details
+            <div class="modal-header">
+                <h5 class="modal-title" id="printOptionsModalLabel">
+                    <i class="fas fa-print me-2"></i> Print Options
                 </h5>
-                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body" id="jobDetails" style="max-height: 70vh; overflow-y: auto;">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Loading job details...</p>
+            <div class="modal-body">
+                <p class="fw-bold mb-3">Select documents to print:</p>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input print-option" value="parts"
+                        id="printParts" style="width: 22px; height: 22px; cursor: pointer; margin-top: 0;">
+                    <label class="form-check-label fw-bold" for="printParts" style="cursor: pointer; font-size: 15px; margin-left: 12px;">
+                        Parts List
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input print-option" value="quotation"
+                        id="printQuotation" style="width: 22px; height: 22px; cursor: pointer; margin-top: 0;">
+                    <label class="form-check-label fw-bold" for="printQuotation" style="cursor: pointer; font-size: 15px; margin-left: 12px;">
+                        Quotation
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input print-option" value="invoice"
+                        id="printInvoice" style="width: 22px; height: 22px; cursor: pointer; margin-top: 0;">
+                    <label class="form-check-label fw-bold" for="printInvoice" style="cursor: pointer; font-size: 15px; margin-left: 12px;">
+                        Invoice
+                    </label>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>Close
-                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmPrint">Print</button>
             </div>
         </div>
     </div>
 </div>
+
+@include('admin.partials.payments.payment-section', ['inline' => false])
+
 @endsection
 
 @section('js')
@@ -241,12 +244,7 @@
                 searchable: true,
                 className: 'text-center'
             },
-            {
-                data: 'parts',
-                name: 'parts',
-                orderable: false,
-                searchable: false
-            },
+
             {
                 data: 'quotation',
                 name: 'quotation',
@@ -347,5 +345,108 @@
         });
     });
 });
+
+// Print functionality
+var printJobId = null;
+
+$(document).on('click', '.print-btn', function() {
+    printJobId = $(this).data('id');
+    // Reset checkboxes
+    $('.print-option').prop('checked', false);
+    $('#printOptionsModal').modal('show');
+});
+
+$('#confirmPrint').click(function() {
+    var selectedOptions = [];
+
+    // Get selected options
+    $('.print-option:checked').each(function() {
+        selectedOptions.push($(this).val());
+    });
+
+    if (selectedOptions.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Selection',
+            text: 'Please select at least one document to print.',
+            confirmButtonColor: '#28a745'
+        });
+        return;
+    }
+
+    // Close the modal
+    $('#printOptionsModal').modal('hide');
+
+    // Show loading
+    Swal.fire({
+        title: 'Preparing documents...',
+        html: 'Please wait while we prepare your documents.',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    // Make AJAX request to get print data
+    $.ajax({
+        url: "{{ url('admin/job-books/print') }}",
+        type: 'POST',
+        data: {
+            _token: "{{ csrf_token() }}",
+            job_id: printJobId,
+            documents: selectedOptions
+        },
+        success: function(response) {
+            Swal.close();
+
+            if (response.success && response.html) {
+                // Open print preview in a new tab instead of window
+                var printTab = window.open();
+                printTab.document.write(response.html);
+                printTab.document.close();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: response.message || 'Failed to generate print documents.',
+                    confirmButtonColor: '#28a745'
+                });
+            }
+        },
+        error: function(xhr) {
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: xhr.responseJSON?.message || 'An error occurred while preparing print documents.',
+                confirmButtonColor: '#28a745'
+            });
+        }
+    });
+});
+
+</script>
+
+@include('admin.partials.payments.payment-script')
+<script>
+    $(document).on('click', '.payment-btn', function() {
+        var jobId = $(this).data('id');
+        var customerId = $(this).data('customer-id');
+
+        PaymentHandler.init({
+            paymentFor: 'customer',
+            paymentForId: customerId,
+            type: 'job',
+            typeId: jobId,
+            getDetailsUrl: "{{ url('admin/job-books/get-payment-details') }}/" + jobId,
+            processUrl: "{{ url('admin/job-books/process-payment') }}",
+            updateUrl: "{{ url('admin/job-books/update-payment') }}",
+            getHistoryUrl: "{{ url('admin/job-books/get-payment-history') }}",
+            getPaymentUrl: "{{ url('admin/job-books/get-payment') }}",
+            deleteUrl: "{{ url('admin/job-books/delete-payment') }}",
+            modalTitle: 'Job Payment',
+            inline: false
+        });
+    });
 </script>
 @endsection

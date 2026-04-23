@@ -5297,7 +5297,6 @@ a.close.disabled {
     pointer-events: auto;
     background-color: #fff;
     background-clip: padding-box;
-    border: 1px solid forestgreen;
     border-radius: 0.3rem;
     outline: 0;
 }

@@ -12,5 +12,6 @@ class Size extends Model
         'name',
         'status',
         'description',
+        'is_default'
     ];
 }

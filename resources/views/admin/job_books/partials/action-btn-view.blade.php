@@ -14,6 +14,18 @@
             </a>
         </li>
         <li>
+            <button type="button" class="custom-dropdown dropdown-item print-btn" data-id="{{ $id }}" data-bs-toggle="modal" data-bs-target="#printOptionsModal">
+                <i class="fas fa-print me-2 text-success"></i> Print
+            </button>
+        </li>
+        <li>
+            <button type="button" class="custom-dropdown dropdown-item payment-btn"
+                data-id="{{ $id }}"
+                data-customer-id="{{ $customer_id }}">
+                <i class="fas fa-money-bill-wave me-2 text-success"></i> Payment
+            </button>
+        </li>
+        <li>
             <button type="button" class="custom-dropdown dropdown-item delete-btn" data-id="{{ $id }}">
                 <i class="fas fa-trash me-2 text-danger"></i> Delete
             </button>

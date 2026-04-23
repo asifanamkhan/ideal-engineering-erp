@@ -206,7 +206,11 @@
                         <label class="form-label fw-bold">Size <span class="text-danger">*</span></label>
                         <select id="size_id" class="form-control">
                             @foreach($sizes as $size)
-                            <option value="{{ $size->id }}">{{ $size->name }}</option>
+                            <option
+                            @if ($size->is_default == 1)
+                                selected
+                            @endif
+                            value="{{ $size->id }}">{{ $size->name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -596,7 +600,6 @@ $(document).ready(function() {
         calculateTotals();
 
         $('#part_id').val('').trigger('change');
-        $('#size_id').val('1').trigger('change');
     });
 
     // Render Parts Table

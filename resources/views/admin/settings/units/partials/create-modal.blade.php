@@ -8,7 +8,7 @@
                 <h5 class="modal-title">Create New Unit</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form id="createPartForm" method="POST" action="{{ route('admin.parts.store') }}">
+            <form id="createPartForm" method="POST" action="{{ route('admin.units.store') }}">
                 @csrf
                 <div class="modal-body">
                     <!-- Same form fields as in index.blade.php -->

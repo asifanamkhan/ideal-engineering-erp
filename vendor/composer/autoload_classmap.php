@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Helpers\\NumberToWords' => $baseDir . '/app/Helpers/NumberToWords.php',
     'App\\Http\\Controllers\\Admin\\Contacts\\CustomerController' => $baseDir . '/app/Http/Controllers/Admin/Contacts/CustomerController.php',
     'App\\Http\\Controllers\\Admin\\Contacts\\SupplierController' => $baseDir . '/app/Http/Controllers/Admin/Contacts/SupplierController.php',
     'App\\Http\\Controllers\\Admin\\DepartmentController' => $baseDir . '/app/Http/Controllers/Admin/DepartmentController.php',

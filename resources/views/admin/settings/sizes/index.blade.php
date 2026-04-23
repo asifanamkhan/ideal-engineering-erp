@@ -34,6 +34,7 @@
                             <th>#</th>
                             <th>Name</th>
                             <th>Status</th>
+                            <th>Default</th>
                             <th>Description</th>
                             <th>Actions</th>
                         </tr>
@@ -67,7 +68,13 @@
                         <input type="text" class="form-control" id="name" name="name" required>
                         <div class="invalid-feedback"></div>
                     </div>
-
+                    <div class="mb-3">
+                        <label for="is_default" class="form-label">Default</label>
+                        <select class="form-control" id="is_default" name="is_default">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label for="status" class="form-label">Status</label>
                         <select class="form-control" id="status" name="status">
@@ -112,9 +119,10 @@
             ajax: "{{ route('admin.sizes.index') }}",
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, width: '5%' },
-                { data: 'name', name: 'name', width: '40%' },
+                { data: 'name', name: 'name', width: '35%' },
                 { data: 'status_badge', name: 'status', width: '10%', orderable: false, searchable: false, className: 'text-center' },
-                { data: 'description', name: 'description', width: '35%' },
+                { data: 'is_default', name: 'is_default', width: '10%', orderable: false, searchable: false, className: 'text-center' },
+                { data: 'description', name: 'description', width: '30%' },
                 { data: 'action', name: 'action', orderable: false, searchable: false, width: '10%', className: 'text-center' }
             ],
             order: [[1, 'asc']],
@@ -195,6 +203,14 @@
                         $('#status').val('0');
                     } else {
                         $('#status').val(data.status);
+                    }
+
+                    if (data.is_default == 1) {
+                        $('#is_default').val('1');
+                    } else if (data.is_default == 0) {
+                        $('#is_default').val('0');
+                    } else {
+                        $('#is_default').val(data.is_default);
                     }
 
                     $('#description').val(data.description);

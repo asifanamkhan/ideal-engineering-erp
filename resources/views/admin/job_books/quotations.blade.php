@@ -50,12 +50,36 @@
         align-items: center;
         gap: 5px;
     }
-    .badge.bg-info { background-color: #36b9cc !important; color: white; }
-    .badge.bg-success { background-color: #1cc88a !important; color: white; }
-    .badge.bg-secondary { background-color: #858796 !important; color: white; }
-    .badge.bg-warning { background-color: #f6c23e !important; color: #212529; }
-    .badge.bg-primary { background-color: #4e73df !important; color: white; }
-    .badge.bg-danger { background-color: #e74a3b !important; color: white; }
+
+    .badge.bg-info {
+        background-color: #36b9cc !important;
+        color: white;
+    }
+
+    .badge.bg-success {
+        background-color: #1cc88a !important;
+        color: white;
+    }
+
+    .badge.bg-secondary {
+        background-color: #858796 !important;
+        color: white;
+    }
+
+    .badge.bg-warning {
+        background-color: #f6c23e !important;
+        color: #212529;
+    }
+
+    .badge.bg-primary {
+        background-color: #4e73df !important;
+        color: white;
+    }
+
+    .badge.bg-danger {
+        background-color: #e74a3b !important;
+        color: white;
+    }
 
     .form-control-sm-custom {
         font-size: 0.875rem;
@@ -116,45 +140,85 @@
                 </div>
 
                 <!-- Job Information Display -->
-                <div id="jobInfo" style="display: none;">
-                    <div class="job-info-card p-3 mt-3 rounded">
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 ">
+                <div class="card shadow mt-2" id="jobInfo" style="display: none;">
+                    <div class="card-body">
+                        <div class="job-info-card p-3 rounded">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small class="text-muted">Job ID</small>
+                                    <p class="fw-bold mb-0" id="displayJobId">-</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Job Status</small>
+                                    <p class="mb-0" id="displayJobStatus">-</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Job Date</small>
+                                    <p class="fw-bold mb-0" id="displayJobDate">-</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Engine</small>
+                                    <p class="fw-bold mb-0" id="displayEngine">-</p>
+                                </div>
+                                <div class="col-md-12">
+                                    <small class="text-muted">Descrption</small>
+                                    <p class="fw-bold mb-0" id="displayDescription">-</p>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-4">
+                                    <small class="text-muted">Customer</small>
+                                    <p class="fw-bold mb-0" id="displayCustomer">-</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Phone</small>
+                                    <p class="mb-0" id="displayPhone">-</p>
+                                </div>
+                                <div class="col-md-5">
+                                    <small class="text-muted">Address</small>
+                                    <p class="mb-0" id="displayAddress">-</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow mt-2" id="quotationFormCard" style="display: none;">
+                    <div class="card-body">
                         <div class="row">
-                            <div class="col-md-3">
-                                <small class="text-muted">Job ID</small>
-                                <p class="fw-bold mb-0" id="displayJobId">-</p>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Quotation Date <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" name="quotation_date" id="quotation_date" class="form-control"
+                                        value="{{ date('Y-m-d') }}">
+                                </div>
                             </div>
-                            <div class="col-md-3">
-                                <small class="text-muted">Job Status</small>
-                                <p class="mb-0" id="displayJobStatus">-</p>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Quotation Status</label>
+                                    <select name="quotation_status" id="quotation_status" class="form-control">
+                                        <option value="not_send">Not Send</option>
+                                        <option value="send">Send</option>
+                                        <option value="pending">Pending</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-md-3">
-                                <small class="text-muted">Job Date</small>
-                                <p class="fw-bold mb-0" id="displayJobDate">-</p>
-                            </div>
-                            <div class="col-md-3">
-                                <small class="text-muted">Engine</small>
-                                <p class="fw-bold mb-0" id="displayEngine">-</p>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <div class="col-md-3">
-                                <small class="text-muted">Customer</small>
-                                <p class="fw-bold mb-0" id="displayCustomer">-</p>
-                            </div>
-                            <div class="col-md-3">
-                                <small class="text-muted">Phone</small>
-                                <p class="mb-0" id="displayPhone">-</p>
-                            </div>
-                            <div class="col-md-3">
-                                <small class="text-muted">Address</small>
-                                <p class="mb-0" id="displayAddress">-</p>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-3 text-end" id="printBtnContainer" style="display: none;">
-                                <button type="button" class="btn btn-info btn-sm" id="printQuotationBtn">
-                                    <i class="fas fa-print me-1"></i> Print Quotation
-                                </button>
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Quotation Description</label>
+                                    <textarea name="quotation_description" id="quotation_description"
+                                        class="form-control" rows="2"
+                                        placeholder="Enter quotation description..."></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -163,36 +227,7 @@
         </div>
 
         <!-- Quotation Form -->
-        <div class="card shadow mt-4" id="quotationFormCard" style="display: none;">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Quotation Date <span class="text-danger">*</span></label>
-                            <input type="date" name="quotation_date" id="quotation_date" class="form-control"
-                                value="{{ date('Y-m-d') }}">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Quotation Status</label>
-                            <select name="quotation_status" id="quotation_status" class="form-control">
-                                <option value="not_send">Not Send</option>
-                                <option value="send">Send</option>
-                                <option value="pending">Pending</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Quotation Description</label>
-                            <textarea name="quotation_description" id="quotation_description" class="form-control"
-                                rows="3" placeholder="Enter quotation description..."></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Services Selection Section -->
         <div class="card shadow mt-4" id="servicesCard" style="display: none;">
@@ -225,7 +260,11 @@
                         <select id="service_unit" class="form-control">
                             <option value="">Select Unit</option>
                             @foreach($units as $unit)
-                            <option value="{{ $unit->id }}" data-name="{{ $unit->name }}">
+                            <option
+                                @if ($unit->is_default == 1)
+                                    selected
+                                @endif
+                                value="{{ $unit->id }}" data-name="{{ $unit->name }}">
                                 {{ $unit->name }}
                             </option>
                             @endforeach
@@ -277,7 +316,8 @@
                 <button type="button" class="btn btn-lg btn-secondary px-4" id="resetBtn">
                     <i class="fas fa-undo me-2"></i> Reset
                 </button>
-                <button onclick="return confirm('Are you sure you want to save this quotation?')" type="button" id="saveQuotationBtn" class="btn btn-lg btn-success px-4">
+                <button onclick="return confirm('Are you sure you want to save this quotation?')" type="button"
+                    id="saveQuotationBtn" class="btn btn-lg btn-success px-4">
                     <i class="fas fa-save me-2"></i> Save Quotation
                 </button>
             </div>
@@ -334,7 +374,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-$(document).ready(function() {
+    $(document).ready(function() {
     // Activate sidebar
     $('#quotations-index-sidebar, #jobs-sidebar').addClass('active');
     $('#collapseJobs').addClass('show');
@@ -462,89 +502,102 @@ $(document).ready(function() {
         }
     });
 
-    // Get status badge class
-    function getStatusBadge(status) {
-        const badges = {
-            'pending': 'badge bg-warning',
-            'in_progress': 'badge bg-info',
-            'completed': 'badge bg-success',
-            'cancelled': 'badge bg-danger'
-        };
-        const badgeClass = badges[status] || 'badge bg-secondary';
-        const statusText = status ? status.replace('_', ' ').toUpperCase() : 'PENDING';
-        return '<span class="' + badgeClass + '">' + statusText + '</span>';
-    }
+
+function getStatusBadge(status) {
+    console.log(status);
+    const badges = {
+        'pending': 'badge bg-warning',
+        'in_progress': 'badge bg-info',
+        'completed': 'badge bg-success',
+        'cancelled': 'badge bg-danger',
+        'not_started': 'badge bg-secondary'
+    };
+
+    // Convert status to lowercase for comparison
+    const statusKey = (status || 'pending').toLowerCase();
+    const badgeClass = badges[statusKey] || 'badge bg-secondary';
+
+    // Format status text for display
+    let statusText = statusKey.replace('_', ' ').replace('-', ' ');
+    statusText = statusText.toUpperCase();
+
+    return '<span class="' + badgeClass + '">' + statusText + '</span>';
+}
 
     // Load Job Details and Existing Quotation
-    function loadJobDetails(jobId) {
-        $.ajax({
-            url: "{{ url('admin/jobs/get-details') }}/" + jobId,
-            type: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    $('#displayJobId').text(response.job.job_id);
-                    $('#displayJobStatus').html(getStatusBadge(response.job.status));
-                    $('#displayJobDate').text(response.job.job_date);
-                    $('#displayEngine').text(response.job.engine || 'N/A');
-                    $('#displayCustomer').text(response.job.customer_name || 'N/A');
-                    $('#displayPhone').text(response.job.customer_phone || 'N/A');
-                    $('#displayAddress').text(response.job.customer_address || 'N/A');
-                    $('#jobInfo').show();
-                    $('#quotationFormCard').show();
-                    $('#servicesCard').show();
+    // Load Job Details and Existing Quotation
+function loadJobDetails(jobId) {
+    $.ajax({
+        url: "{{ url('admin/jobs/get-details') }}/" + jobId,
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
 
-                    if (response.job.quotation_date || response.job.quotation_description || (response.services && response.services.length > 0)) {
-                        hasQuotation = true;
-                        $('#printBtnContainer').show();
-                    } else {
-                        hasQuotation = false;
-                        $('#printBtnContainer').hide();
-                    }
+                $('#displayJobId').text(response.job.job_id);
+                $('#displayJobStatus').html(getStatusBadge(response.job.job_status));
+                $('#displayJobDate').text(response.job.job_date);
+                $('#displayEngine').text(response.job.engine || 'N/A');
+                $('#displayDescription').text(response.job.descriptions || 'N/A');
+                $('#displayCustomer').text(response.job.customer_name || 'N/A');
+                $('#displayPhone').text(response.job.customer_phone || 'N/A');
+                $('#displayAddress').text(response.job.customer_address || 'N/A');
+                $('#jobInfo').show();
+                $('#quotationFormCard').show();
+                $('#servicesCard').show();
 
-                    if (response.job.quotation_date || response.job.quotation_description) {
-                        $('#quotation_date').val(response.job.quotation_date || '{{ date("Y-m-d") }}');
-                        $('#quotation_description').val(response.job.quotation_description || '');
-                        $('#quotation_status').val(response.job.quotation_status || 'not_send');
+                if (response.job.quotation_date || response.job.quotation_description || (response.services && response.services.length > 0)) {
+                    hasQuotation = true;
+                    $('#printBtnContainer').show();
+                } else {
+                    hasQuotation = false;
+                    $('#printBtnContainer').hide();
+                }
 
-                        if (response.services && response.services.length > 0) {
-                            servicesList = [];
-                            rowCounter = 0;
-                            response.services.forEach(function(service, index) {
-                                servicesList.push({
-                                    temp_id: rowCounter++,
-                                    service_id: service.service_id,
-                                    service_name: service.service_name,
-                                    unit_id: service.unit_id || null,
-                                    unit_name: service.unit_name || '',
-                                    price: parseFloat(service.price),
-                                    quantity: service.quantity,
-                                    total: parseFloat(service.total_price),
-                                    db_id: service.id
-                                });
+                if (response.job.quotation_date || response.job.quotation_description) {
+                    $('#quotation_date').val(response.job.quotation_date || '{{ date("Y-m-d") }}');
+                    $('#quotation_description').val(response.job.quotation_description || '');
+                    $('#quotation_status').val(response.job.quotation_status || 'not_send');
+
+                    if (response.services && response.services.length > 0) {
+                        servicesList = [];
+                        rowCounter = 0;
+                        response.services.forEach(function(service, index) {
+                            servicesList.push({
+                                temp_id: rowCounter++,
+                                service_id: service.service_id,
+                                service_name: service.service_name,
+                                unit_id: service.unit_id || null,
+                                unit_name: service.unit_name || '',
+                                price: parseFloat(service.price),
+                                quantity: service.quantity,
+                                total: parseFloat(service.total_price),
+                                db_id: service.id
                             });
-                            renderServicesTable();
-                            calculateTotals();
-                        } else {
-                            servicesList = [];
-                            renderServicesTable();
-                            calculateTotals();
-                        }
+                        });
+                        renderServicesTable();
+                        calculateTotals();
                     } else {
-                        $('#quotation_date').val('{{ date("Y-m-d") }}');
-                        $('#quotation_description').val('');
                         servicesList = [];
                         renderServicesTable();
                         calculateTotals();
-                        $('#printBtnContainer').hide();
                     }
+                } else {
+                    $('#quotation_date').val('{{ date("Y-m-d") }}');
+                    $('#quotation_description').val('');
+                    servicesList = [];
+                    renderServicesTable();
+                    calculateTotals();
+                    $('#printBtnContainer').hide();
                 }
-            },
-            error: function(xhr) {
-                Swal.fire('Error', 'Failed to load job details', 'error');
             }
-        });
-    }
+        },
+        error: function(xhr) {
+            console.error('Error loading job:', xhr);
+            Swal.fire('Error', 'Failed to load job details', 'error');
+        }
+    });
+}
 
     // Add Service to Table
     $('#addServiceBtn').click(function() {
@@ -594,7 +647,6 @@ $(document).ready(function() {
 
         // Reset selection
         $('#service_id').val('').trigger('change');
-        $('#service_unit').val('');
         $('#service_quantity').val(1);
     });
 
@@ -609,7 +661,7 @@ $(document).ready(function() {
         }
 
         $.each(servicesList, function(index, service) {
-            console.log(service);
+
             var row = `
                 <tr class="service-row">
                     <td>${index + 1}</td>

@@ -7,9 +7,15 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\PaymentHelper;
 
 class JobBookController extends Controller
 {
+    protected $paymentHelper;
+    public function __construct(PaymentHelper $paymentHelper)
+    {
+        $this->paymentHelper = $paymentHelper;
+    }
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -68,43 +74,48 @@ class JobBookController extends Controller
                             <span class="badge bg-primary">' . $delivery_date . '</span>
                         </div>
                     </div>
-                ';
+                    ';
                 })
                 ->addColumn('engine', function ($job_book) {
                     return $job_book->engine ? e($job_book->engine) : 'N/A';
                 })
                 ->addColumn('status_badge', function ($job_book) {
-                    $status = $job_book->job_status ?? 'pending';
+                    $job_status = $job_book->job_status ?? 'pending';
+                    $parts_status = $job_book->parts_status ?? 'not_received';
+
+                    // Job Status Badges
                     $jobBadges = [
                         'pending' => 'badge bg-warning',
                         'in_progress' => 'badge bg-info',
                         'completed' => 'badge bg-success',
                         'cancelled' => 'badge bg-danger'
                     ];
-                    $jobBadgeClass = $jobBadges[$status] ?? 'badge bg-secondary';
-                    $jobStatusText = ucfirst(str_replace('_', ' ', $status));
+                    $jobBadgeClass = $jobBadges[$job_status] ?? 'badge bg-secondary';
+                    $jobStatusText = ucfirst(str_replace('_', ' ', $job_status));
 
-                    return '<div class="text-center"><span class="' . $jobBadgeClass . '">' . $jobStatusText . '</span></div>';
-                })
-                ->addColumn('parts', function ($job_book) {
-                    // Get parts status and total amount
-                    $partsStatus = $job_book->parts_status ?? 'not_received';
+                    // Parts Status Badges
                     $partsBadges = [
                         'received' => 'badge bg-success',
                         'not_received' => 'badge bg-danger',
                         'partial' => 'badge bg-warning'
                     ];
-                    $partsBadgeClass = $partsBadges[$partsStatus] ?? 'badge bg-secondary';
-                    $partsStatusText = ucfirst(str_replace('_', ' ', $partsStatus));
+                    $partsBadgeClass = $partsBadges[$parts_status] ?? 'badge bg-secondary';
+                    $partsStatusText = ucfirst(str_replace('_', ' ', $parts_status));
 
                     return '
                     <div class="w-100">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-bold"><i class="fas fa-chart-line me-1"></i> Job:</span>
+                            <span class="' . $jobBadgeClass . '">' . $jobStatusText . '</span>
+                        </div>
                         <div class="d-flex justify-content-between">
+                            <span class="fw-bold"><i class="fas fa-microchip me-1"></i> Parts:</span>
                             <span class="' . $partsBadgeClass . '">' . $partsStatusText . '</span>
                         </div>
                     </div>
-                ';
+                    ';
                 })
+
                 ->addColumn('quotation', function ($job_book) {
                     // Check if quotation exists
                     $quotationDate = $job_book->quotation_date;
@@ -123,7 +134,7 @@ class JobBookController extends Controller
                         $statusBadgeClass = $statusBadges[$quotationStatus] ?? 'badge bg-secondary';
                         $statusText = $quotationStatus ? ucfirst(str_replace('_', ' ', $quotationStatus)) : 'Not Send';
 
-                        $actionText = '<a href="' . route('admin.job-quotations.create', ['job_id' => $job_book->id]) . '" class="btn btn-sm btn-custom-sm btn-outline-primary w-100">View Quotation</a>';
+                        $actionText = '<a href="' . route('admin.job-quotations.create', ['job_id' => $job_book->id]) . '" class="w-100">View Quotation</a>';
 
                         return '
                             <div class="w-100">
@@ -139,7 +150,7 @@ class JobBookController extends Controller
                             </div>
                         ';
                     } else {
-                        $actionText = '<a href="' . route('admin.job-quotations.create', ['job_id' => $job_book->id]) . '" class="btn btn-sm btn-custom-sm btn-outline-success w-100">Generate Quotation</a>';
+                        $actionText = '<a href="' . route('admin.job-quotations.create', ['job_id' => $job_book->id]) . '" class="w-100">Generate Quotation</a>';
                         return '
                             <div class="w-100 text-center">
                                 ' . $actionText . '
@@ -165,7 +176,7 @@ class JobBookController extends Controller
                         $statusBadgeClass = $statusBadges[$invoiceStatus] ?? 'badge bg-secondary';
                         $statusText = $invoiceStatus ? ucfirst($invoiceStatus) : 'Generated';
 
-                        $actionText = '<a href="' . route('admin.job-invoices.create', ['job_id' => $job_book->id]) . '" class="btn btn-sm btn-custom-sm btn-outline-primary w-100">View Invoice</a>';
+                        $actionText = '<a href="' . route('admin.job-invoices.create', ['job_id' => $job_book->id]) . '" class=" w-100">View Invoice</a>';
 
                         return '
                             <div class="w-100">
@@ -181,7 +192,7 @@ class JobBookController extends Controller
                             </div>
                         ';
                     } else {
-                        $actionText = '<a href="' . route('admin.job-invoices.create', ['job_id' => $job_book->id]) . '" class="btn btn-sm btn-custom-sm btn-outline-success w-100">generate Invoice</a>';
+                        $actionText = '<a href="' . route('admin.job-invoices.create', ['job_id' => $job_book->id]) . '" class="w-100">generate Invoice</a>';
                         return '
                             <div class="w-100 text-center">
                                 ' . $actionText . '
@@ -190,9 +201,9 @@ class JobBookController extends Controller
                     }
                 })
                 ->addColumn('action', function ($job_book) {
-                    return view('admin.job_books.partials.action-btn-view', ['id' => $job_book->id])->render();
+                    return view('admin.job_books.partials.action-btn-view', ['id' => $job_book->id, 'customer_id' => $job_book->customer_id])->render();
                 })
-                ->rawColumns(['customer', 'date', 'status_badge', 'parts', 'quotation', 'invoice', 'action'])
+                ->rawColumns(['customer', 'date', 'status_badge', 'quotation', 'invoice', 'action'])
                 ->make(true);
         }
 
@@ -534,11 +545,23 @@ class JobBookController extends Controller
     public function destroy($id)
     {
         try {
-            $job_book = DB::table('job_books')->where('id', $id)->delete();
+            DB::beginTransaction();
 
-            return response()->json(['success' => true, 'message' => 'Part deleted successfully!']);
+            // First delete related records (job_parts, job_quotations, job_invoices, payments)
+            DB::table('job_parts')->where('job_book_id', $id)->delete();
+            DB::table('job_quotations')->where('job_book_id', $id)->delete();
+            DB::table('job_invoices')->where('job_book_id', $id)->delete();
+            DB::table('payments')->where('type_id', $id)->where('type', 'job')->delete();
+
+            // Then delete job_book
+            DB::table('job_books')->where('id', $id)->delete();
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Job deleted successfully!']);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to delete job_book'], 500);
+            DB::rollBack();
+            return response()->json(['success' => false, 'error' => 'Failed to delete job: ' . $e->getMessage()], 500);
         }
     }
     public function searchJobs(Request $request)
@@ -709,12 +732,329 @@ class JobBookController extends Controller
                 'updated_at' => now(),
             ]);
 
+            // ========== পেমেন্ট অংশ যোগ করো ==========
+            if ($request->payment_amount && $request->payment_amount > 0) {
+                $job = DB::table('job_books')->where('id', $request->job_id)->first();
+                $paymentData = $request->payment_data;
+
+                $additionalData = [
+                    'narration' => $request->narration,
+                    'chq_no' => $paymentData['chq_no'] ?? null,
+                    'chq_date' => $paymentData['chq_date'] ?? null,
+                    'card_no' => $paymentData['card_no'] ?? null,
+                    'online_trx_id' => $paymentData['online_trx_id'] ?? null,
+                    'online_trx_dt' => $paymentData['online_trx_dt'] ?? null,
+                    'mfs_name' => $paymentData['mfs_name'] ?? null,
+                    'bank_code' => $paymentData['bank_code'] ?? null,
+                    'bank_ac_no' => $paymentData['bank_ac_no'] ?? null,
+                ];
+
+                $entityData = [
+                    'table' => 'job_books',
+                    'amount_field' => 'invoice_amount',
+                    'discount_field' => 'invoice_discount',
+                    'paid_field' => 'invoice_paid_amount',
+                    'status_field' => 'invoice_status'
+                ];
+
+                $result = $this->paymentHelper->processPayment(
+                    'customer',
+                    $job->customer_id,
+                    'job',
+                    $request->job_id,
+                    $request->payment_amount,
+                    $request->payment_mode_id,
+                    $additionalData,
+                    $entityData
+                );
+
+                if (!$result['success']) {
+                    throw new \Exception($result['message']);
+                }
+            }
+            // ======================================
+
             DB::commit();
 
             return response()->json(['success' => true, 'message' => 'Invoice saved successfully!']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function print(Request $request)
+    {
+        try {
+            $jobId = $request->job_id;
+            $documents = $request->documents;
+
+            // Fetch job data using DB queries
+            $job = DB::table('job_books')
+                ->where('id', $jobId)
+                ->first();
+
+            if (!$job) {
+                throw new \Exception('Job not found');
+            }
+
+            // Fetch customer data
+            $customer = DB::table('customers')
+                ->where('id', $job->customer_id)
+                ->first();
+
+            // Fetch job parts
+            $jobParts = DB::table('job_parts')
+                ->leftJoin('parts', 'job_parts.parts_id', '=', 'parts.id')
+                ->leftJoin('sizes', 'job_parts.size_id', '=', 'sizes.id')
+                ->where('job_parts.job_book_id', $jobId)
+                ->select(
+                    'job_parts.*',
+                    'parts.name as part_name',
+                    'sizes.name as size_name',
+                    'parts.description as part_description'
+                )
+                ->get();
+
+            // Fetch quotation items
+            $quotationItems = DB::table('job_quotations')
+                ->leftJoin('services', 'job_quotations.service_id', '=', 'services.id')
+                ->leftJoin('units', 'job_quotations.unit_id', '=', 'units.id')
+                ->where('job_quotations.job_book_id', $jobId)
+                ->select(
+                    'job_quotations.*',
+                    'services.name as service_name',
+                    'services.description as service_description',
+                    'units.name as unit_name'
+                )
+                ->get();
+
+            // Fetch invoice items
+            $invoiceItems = DB::table('job_invoices')
+                ->leftJoin('services', 'job_invoices.service_id', '=', 'services.id')
+                ->leftJoin('units', 'job_invoices.unit_id', '=', 'units.id')
+                ->where('job_invoices.job_book_id', $jobId)
+                ->select(
+                    'job_invoices.*',
+                    'services.name as service_name',
+                    'services.description as service_description',
+                    'units.name as unit_name'
+                )
+                ->get();
+
+            // Prepare job data
+            $jobData = (object) [
+                'id' => $job->id,
+                'job_id' => $job->job_id,
+                'date' => $job->job_date,
+                'engine' => $job->engine,
+                'status' => $job->job_status,
+                'description' => $job->descriptions,
+                'parts_status' => $job->parts_status,
+                'delivery_date' => $job->delivery_date,
+                'parts_amount' => $job->parts_amount,
+                'invoice_amount' => $job->invoice_amount,
+                'invoice_discount' => $job->invoice_discount,
+                'quotation_amount' => $job->quotation_amount,
+                'quotation_date' => $job->quotation_date,
+                'invoice_date' => $job->invoice_date,
+                'customer' => $customer,
+                'jobParts' => $jobParts,
+                'quotation' => (object)[
+                    'quotation_date' => $job->quotation_date,
+                    'quotation_amount' => $job->quotation_amount,
+                    'quotation_description' => $job->quotation_description,
+                    'quotation_status' => $job->quotation_status,
+                    'items' => $quotationItems
+                ],
+                'invoice' => (object)[
+                    'invoice_date' => $job->invoice_date,
+                    'invoice_amount' => $job->invoice_amount,
+                    'invoice_discount' => $job->invoice_discount,
+                    'invoice_description' => $job->invoice_description,
+                    'invoice_status' => $job->invoice_status,
+                    'invoice_paid_amount' => $job->invoice_paid_amount ?? 0,
+                    'items' => $invoiceItems
+                ]
+            ];
+
+            // Generate HTML for print
+            $html = view('admin.job_books.prints.print-layout', compact('jobData', 'documents'))->render();
+
+            return response()->json([
+                'success' => true,
+                'html' => $html
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getPaymentDetails($id)
+    {
+        $entityData = [
+            'table' => 'job_books',
+            'amount_field' => 'invoice_amount',
+            'discount_field' => 'invoice_discount',
+            'paid_field' => 'invoice_paid_amount',
+            'status_field' => 'invoice_status'
+        ];
+
+        $result = $this->paymentHelper->getPaymentDetails('job', $id, $entityData);
+        return response()->json($result);
+    }
+
+    public function getPaymentHistory($typeId)
+    {
+        $result = $this->paymentHelper->getPaymentHistory('job', $typeId);
+        return response()->json($result);
+    }
+
+    public function getPayment($paymentId)
+    {
+        $result = $this->paymentHelper->getSinglePayment($paymentId);
+        return response()->json($result);
+    }
+
+    public function processPayment(Request $request)
+    {
+        try {
+            $paymentMode = DB::table('acc_payment_modes')->where('id', $request->payment_mode_id)->first();
+            if (!$paymentMode) {
+                return response()->json(['success' => false, 'message' => 'Payment mode not found'], 422);
+            }
+
+            $validationRules = $this->getValidationRules($paymentMode->mode_name);
+            $validationRules['payment_amount'] = 'required|numeric|min:0.01';
+            $validationRules['payment_mode_id'] = 'required|exists:acc_payment_modes,id';
+            $validationRules['type_id'] = 'required|exists:job_books,id';
+
+            $request->validate($validationRules);
+
+            $job = DB::table('job_books')->where('id', $request->type_id)->first();
+            if (!$job) {
+                return response()->json(['success' => false, 'message' => 'Job not found'], 404);
+            }
+
+            $additionalData = $request->only([
+                'chq_no',
+                'chq_date',
+                'card_no',
+                'online_trx_id',
+                'online_trx_dt',
+                'mfs_name',
+                'bank_code',
+                'bank_ac_no',
+                'narration'
+            ]);
+
+            $entityData = [
+                'table' => 'job_books',
+                'amount_field' => 'invoice_amount',
+                'discount_field' => 'invoice_discount',
+                'paid_field' => 'invoice_paid_amount',
+                'status_field' => 'invoice_status'
+            ];
+
+            $result = $this->paymentHelper->processPayment(
+                'customer',
+                $job->customer_id,
+                'job',
+                $request->type_id,
+                $request->payment_amount,
+                $request->payment_mode_id,
+                $additionalData,
+                $entityData
+            );
+
+            return response()->json($result, $result['success'] ? 200 : 422);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function updatePayment(Request $request)
+    {
+        try {
+            $request->validate([
+                'payment_id' => 'required|exists:payments,id',
+                'payment_amount' => 'required|numeric|min:0.01',
+                'payment_mode_id' => 'required|exists:acc_payment_modes,id',
+            ]);
+
+            $additionalData = $request->only([
+                'chq_no',
+                'chq_date',
+                'card_no',
+                'online_trx_id',
+                'online_trx_dt',
+                'mfs_name',
+                'bank_code',
+                'bank_ac_no',
+                'narration'
+            ]);
+
+            $entityData = [
+                'table' => 'job_books',
+                'amount_field' => 'invoice_amount',
+                'discount_field' => 'invoice_discount',
+                'paid_field' => 'invoice_paid_amount',
+                'status_field' => 'invoice_status'
+            ];
+
+            $result = $this->paymentHelper->updatePayment(
+                $request->payment_id,
+                $request->payment_amount,
+                $request->payment_mode_id,
+                $additionalData,
+                $entityData
+            );
+
+            return response()->json($result, $result['success'] ? 200 : 422);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function deletePayment(Request $request)
+    {
+        try {
+            $request->validate([
+                'payment_id' => 'required|exists:payments,id',
+                'type_id' => 'required|exists:job_books,id',
+            ]);
+
+            $entityData = [
+                'table' => 'job_books',
+                'amount_field' => 'invoice_amount',
+                'discount_field' => 'invoice_discount',
+                'paid_field' => 'invoice_paid_amount',
+                'status_field' => 'invoice_status'
+            ];
+
+            $result = $this->paymentHelper->deletePayment($request->payment_id, $request->type_id, $entityData);
+            return response()->json($result, $result['success'] ? 200 : 422);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function getValidationRules($modeName)
+    {
+        switch ($modeName) {
+            case 'Cheque':
+                return ['chq_no' => 'required|string', 'chq_date' => 'required|date'];
+            case 'Card':
+                return ['card_no' => 'required|string'];
+            case 'Mobile Banking':
+                return ['mfs_name' => 'required|string|in:Bkash,Nagad,Rocket,Ok Wallet,Upay'];
+            case 'Internet Banking':
+                return ['bank_code' => 'required|string', 'bank_ac_no' => 'required|string'];
+            default:
+                return [];
         }
     }
 }

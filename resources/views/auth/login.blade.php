@@ -2,101 +2,105 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>IDEAL ENGINEERINGS WORKS</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <!-- Our Custom CSS -->
+    <style>
+        body {
+            background-image: url("{{ asset('public/dashboard/img/login-bg.jpeg') }}");
+            background-size: cover;
+        }
 
-    <title>RAPID</title>
+        .area {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+            background: #00000075
+        }
 
-    <!-- Custom fonts for this template-->
-    <link href="{{ asset('public/dashboard/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet"
-        type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
 
-    <!-- Custom styles for this template-->
-    <link href="{{ asset('public/dashboard/css/sb-admin-2.min.css') }}" rel="stylesheet">
+        .card {
+            /* background: #0000004f; */
+            background: #13027d61;
+            color: white;
+            border-radius: 25px;
+        }
 
+        .form-control {
+            background: #00000000 !important;
+            color: white !important;
+            border: none;
+            border-bottom: 1px solid white;
+            border-radius: inherit;
+        }
+
+        .btn-primary {
+            box-shadow: none !important;
+        }
+    </style>
 </head>
 
-<body class="bg-gradient-primary">
-
-    <div class="container">
-
-        <!-- Outer Row -->
-        <div class="row justify-content-center">
-
-            <div class="col-xl-6 col-lg-6 col-md-6">
-
-                <div class="card o-hidden border-0 shadow-lg my-5 login-card" style="margin-top: 5rem !important">
-                    <div class="card-body p-0">
-                        <!-- Nested Row within Card Body -->
-                        <div class="row">
-                            <div class="col-lg-6 d-lg-block bg-login-image">
-
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="p-5">
-                                    <div class="text-center">
-                                        {{-- <h1 class="h5 text-gray-900 mb-4"><img style="width:50%" src="" alt=""></h1> --}}
-                                        <h1 style="color: #13027D; margin-bottom:80px">IDEAL ENGINEERING</h1>
-                                    </div>
-
-                                    <form class="user" method="POST" action="{{ route('login') }}">
-                                        @csrf
-                                        <div class="form-group">
-                                            <input name="email" type="email" class="form-control form-control-user"
-                                                id="exampleInputEmail" aria-describedby="emailHelp"
-                                                placeholder="Enter Email Address">
-                                        </div>
-                                        <div class="form-group">
-                                            <input name="password" type="password" class="form-control form-control-user"
-                                                id="exampleInputPassword" placeholder="Password">
-                                        </div>
-                                        <br>
-                                        <button class="btn btn-primary btn-user btn-block">
-                                            Login
-                                        </button>
-                                        {{--
-                                        <hr>
-                                        <a href="index.html" class="btn btn-google btn-user btn-block">
-                                            <i class="fab fa-google fa-fw"></i> Login with Google
-                                        </a>
-                                        <a href="index.html" class="btn btn-facebook btn-user btn-block">
-                                            <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
-                                        </a> --}}
-                                    </form>
-                                    {{-- <hr> --}}
-                                    {{-- <div class="text-center">
-                                        <a class="small" href="forgot-password.html">Forgot Password?</a>
-                                        <a class="small" href="{{ route('candidate.register') }}">New Registration</a>
-                                    </div> --}}
-
+<body style="">
+    <div class="area">
+        <div class="container">
+            <div class="container-fluid">
+                <div class="">
+                    <div class="card">
+                        <div class="p-5">
+                            @php
+                            $name = DB::table('generel_settings')->first()
+                            @endphp
+                            <h4 style="text-align: center; font-size:2.2rem; margin-bottom:30px; color: white">
+                                @if (@$name->conpany_name)
+                                {{ $name->conpany_name }}
+                                @else
+                                IDEAL ENGINEERINGS WORKS
+                                @endif
+                            </h4>
+                            <form method="POST" action="{{ route('login') }}" autocomplete="off">
+                                @csrf
+                                <div class="form-group mb-3">
+                                    <label for="">Email </label>
+                                    <input name='email' type='email'
+                                        class="form-control @error('email') is-invalid @enderror">
+                                    @error('email')
+                                    <small class="form-text text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
-                            </div>
+                                <br>
+                                <div class="form-group mb-4">
+                                    <label for="">Password </label>
+                                    <input name='password' type='password' autocomplete="new-password"
+                                        class="form-control @error('password') is-invalid @enderror">
+                                    @error('password')
+                                    <small class="form-text text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                <div class="text-center">
+                                    <button style="padding: 0.4rem 1.2rem; font-size:20px" class="btn btn-primary"
+                                        type="submit">Login</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
-    <!-- Bootstrap core JavaScript-->
-    <script src="{{ asset('public/dashboard/vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('public/dashboard/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-
-    <!-- Core plugin JavaScript-->
-    <script src="{{ asset('public/dashboard/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-
-    <!-- Custom scripts for all pages-->
-    <script src="{{ asset('public/dashboard/js/sb-admin-2.min.js') }}"></script>
 
 </body>
 

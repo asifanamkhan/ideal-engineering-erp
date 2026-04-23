@@ -44,6 +44,7 @@ class ComposerStaticInit2ed3a420f7a92ec4ec3b0666acfddcd7
         'a1cfe24d14977df6878b9bf804af2d1c' => __DIR__ . '/..' . '/nunomaduro/collision/src/Adapters/Phpunit/Autoload.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '377b22b161c09ed6e5152de788ca020a' => __DIR__ . '/..' . '/spatie/laravel-permission/src/helpers.php',
+        '49fcd9713ec1cb90a60a3cb08b170194' => __DIR__ . '/../..' . '/app/Helpers/NumberToWords.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -570,6 +571,7 @@ class ComposerStaticInit2ed3a420f7a92ec4ec3b0666acfddcd7
     );
 
     public static $classMap = array (
+        'App\\Helpers\\NumberToWords' => __DIR__ . '/../..' . '/app/Helpers/NumberToWords.php',
         'App\\Http\\Controllers\\Admin\\Contacts\\CustomerController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/Contacts/CustomerController.php',
         'App\\Http\\Controllers\\Admin\\Contacts\\SupplierController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/Contacts/SupplierController.php',
         'App\\Http\\Controllers\\Admin\\DepartmentController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/DepartmentController.php',

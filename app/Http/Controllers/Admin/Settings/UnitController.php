@@ -15,7 +15,9 @@ class UnitController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $units = DB::table('units')->select('*')->orderBy('id', 'desc');
+            $units = DB::table('units')->select('*')
+                    ->orderBy('is_default', 'DESC')
+                    ->orderBy('id', 'desc');
 
             return DataTables::of($units)
                 ->addIndexColumn()
@@ -27,10 +29,15 @@ class UnitController extends Controller
                     $badgeClass = $status === 'active' ? 'badge bg-success' : 'badge bg-danger';
                     return '<span class="' . $badgeClass . '">' . ucfirst($status) . '</span>';
                 })
+                ->addColumn('is_default', function ($unit) {
+                    $status = $unit->is_default == 1 ? 'Yes' : '';
+                    $badgeClass = $status === 'Yes' ? 'badge bg-primary' : ' ';
+                    return '<span class="' . $badgeClass . '">' . ucfirst($status) . '</span>';
+                })
                 ->addColumn('action', function ($unit) {
                     return view('admin.settings.units.partials.action-btn-view', ['id' => $unit->id])->render();
                 })
-                ->rawColumns(['status_badge', 'action'])
+                ->rawColumns(['status_badge', 'action','is_default'])
                 ->make(true);
         }
 
@@ -60,6 +67,12 @@ class UnitController extends Controller
 
         Unit::create($data);
 
+        if($data['is_default'] == 1){
+            DB::table('units')
+                ->where('id', '!=', $data['id'])
+                ->update(['is_default' => 0]);
+        }
+
         return response()->json(['success' => true, 'message' => 'Unit created successfully!']);
     }
 
@@ -73,7 +86,8 @@ class UnitController extends Controller
                 'name' => $unit->name,
                 'price' => $unit->price,
                 'status' => $unit->status,
-                'description' => $unit->description
+                'description' => $unit->description,
+                'is_default' => $unit->is_default
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Unit not found'], 404);
@@ -91,6 +105,7 @@ class UnitController extends Controller
             ],
             'price' => ['nullable', 'numeric'],
             'status' => ['nullable', 'in:0,1'],
+            'is_default' => ['nullable', 'in:0,1'],
             'description' => ['nullable', 'string'],
         ]);
 
@@ -104,6 +119,12 @@ class UnitController extends Controller
             $data['status'] = $request->status ?? $unit->status;
 
             $unit->update($data);
+
+            if($data['is_default'] == 1){
+                DB::table('units')
+                    ->where('id', '!=', $id)
+                    ->update(['is_default' => 0]);
+            }
 
             return response()->json(['success' => true, 'message' => 'Unit updated successfully!']);
         } catch (\Exception $e) {

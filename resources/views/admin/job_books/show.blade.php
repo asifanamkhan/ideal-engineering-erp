@@ -1,12 +1,42 @@
-{{-- resources/views/admin/job_books/show.blade.php --}}
 @extends('layouts.dashboard.app')
 @section('css')
 <style>
     .text-end{
         text-align: right;
     }
+    .nav-pills .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        color: #4a5568;
+        transition: all 0.2s ease;
+    }
+    .nav-pills .nav-link i {
+        font-size: 0.85rem;
+    }
+    .nav-pills .nav-link.active {
+        background-color: #4e73df;
+        color: white;
+        box-shadow: 0 2px 5px rgba(78, 115, 223, 0.3);
+    }
+    .nav-pills .nav-link:not(.active):hover {
+        background-color: #e9ecef;
+        color: #2c3e50;
+    }
+    .flex-nowrap {
+        flex-wrap: nowrap;
+    }
+    .overflow-auto {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+    .pb-1 {
+        padding-bottom: 0.25rem;
+    }
 </style>
 @endsection
+
 @section('content')
 <div class="container-fluid ">
     <div class="page-header">
@@ -44,27 +74,19 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-primary custom-toggle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-cog"></i>
+                                <div class="d-flex " style="gap: 12px">
+                                    <button type="button" class="btn btn-sm btn-success print-btn" data-id="{{ $jobBook->id }}">
+                                        <i class="fas fa-print me-1"></i> Print
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <button type="button" class="custom-dropdown dropdown-item view-btn" data-id="{{ $jobBook->id }}">
-                                                <i class="fas fa-eye me-2 text-info"></i> View
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <a href="{{ route('admin.job-books.edit', $jobBook->id) }}" class="custom-dropdown dropdown-item">
-                                                <i class="fas fa-edit me-2 text-primary"></i> Edit
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <button type="button" class="custom-dropdown dropdown-item delete-btn" data-id="{{ $jobBook->id }}">
-                                                <i class="fas fa-trash me-2 text-danger"></i> Delete
-                                            </button>
-                                        </li>
-                                    </ul>
+                                    <button type="button" class="btn btn-sm btn-primary payment-btn" data-id="{{ $jobBook->id }}" data-customer-id="{{ $jobBook->customer_id }}">
+                                        <i class="fas fa-money-bill-wave me-1"></i> Payment
+                                    </button>
+                                    <a href="{{ route('admin.job-books.edit', $jobBook->id) }}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit me-1"></i> Edit
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{ $jobBook->id }}">
+                                        <i class="fas fa-trash me-1"></i> Delete
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -95,18 +117,18 @@
                             <i class="fas fa-receipt me-1"></i> Invoices
                         </button>
                     </li>
-                    {{-- <li class="nav-item" role="presentation">
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="payment-tab" data-bs-toggle="pill" data-bs-target="#payment" type="button" role="tab">
                             <i class="fas fa-credit-card me-1"></i> Payment
                         </button>
-                    </li> --}}
+                    </li>
                 </ul>
             </div>
 
             <!-- Tab Content -->
             <div class="tab-content">
 
-                {{-- JOB TAB - Show all job_books columns --}}
+                {{-- JOB TAB --}}
                 <div class="tab-pane fade show active" id="job" role="tabpanel">
                     <div class="card shadow-sm border-0 rounded-3">
                         <div class="card-body p-3 p-md-4">
@@ -209,7 +231,7 @@
                     </div>
                 </div>
 
-                {{-- PARTS TAB - Datatable view --}}
+                {{-- PARTS TAB --}}
                 <div class="tab-pane fade" id="parts" role="tabpanel">
                     <div class="card shadow-sm border-0 rounded-3">
                         <div class="card-body p-0">
@@ -255,7 +277,7 @@
                     </div>
                 </div>
 
-                {{-- QUOTATIONS TAB - Datatable view with Unit --}}
+                {{-- QUOTATIONS TAB --}}
                 <div class="tab-pane fade" id="quotations" role="tabpanel">
                     <div class="card shadow-sm border-0 rounded-3">
                         <div class="card-body p-0">
@@ -311,7 +333,7 @@
                     </div>
                 </div>
 
-                {{-- INVOICES TAB - Datatable view with Unit --}}
+                {{-- INVOICES TAB --}}
                 <div class="tab-pane fade" id="invoices" role="tabpanel">
                     <div class="card shadow-sm border-0 rounded-3">
                         <div class="card-body p-0">
@@ -342,7 +364,6 @@
                                         @endforelse
                                     </tbody>
                                     <tfoot class="bg-light">
-
                                         <tr>
                                             <th colspan="4" class="text-end fw-bold">Discount:</th>
                                             <th class="text-end pe-3 fw-bold text-danger">- ৳ {{ number_format($jobBook->invoice_discount ?? 0, 2) }}</th>
@@ -372,65 +393,201 @@
                     </div>
                 </div>
 
-                {{-- PAYMENT TAB - Commented for now --}}
-                {{-- <div class="tab-pane fade" id="payment" role="tabpanel">
+                {{-- PAYMENT TAB --}}
+                <div class="tab-pane fade" id="payment" role="tabpanel">
                     <div class="card shadow-sm border-0 rounded-3">
-                        <div class="card-body p-0">
+                        <div class="card-body">
+                            <!-- Payment Summary Cards -->
+                            @php
+                                $totalPaid = DB::table('payments')->where('type', 'job')->where('type_id', $jobBook->id)->sum('amount');
+                                $dueAmount = ($jobBook->invoice_amount ?? 0) - ($jobBook->invoice_discount ?? 0) - $totalPaid;
+                                $paymentCount = DB::table('payments')->where('type', 'job')->where('type_id', $jobBook->id)->count();
+                            @endphp
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted mb-2">Total Invoice</h6>
+                                            <h4 class="mb-0 text-primary">৳ {{ number_format($jobBook->invoice_amount ?? 0, 2) }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted mb-2">Discount</h6>
+                                            <h4 class="mb-0 text-warning">- ৳ {{ number_format($jobBook->invoice_discount ?? 0, 2) }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted mb-2">Paid Amount</h6>
+                                            <h4 class="mb-0 text-success">৳ {{ number_format($totalPaid, 2) }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted mb-2">Due Amount</h6>
+                                            <h4 class="mb-0 text-danger">৳ {{ number_format($dueAmount, 2) }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment History Table -->
                             <div class="table-responsive">
-                                <table class="table table-sm table-hover mb-0">
-                                    <thead class="bg-light">
+                                <table class="table table-sm table-hover" id="show-payment-table">
+                                    <thead class="table-head">
                                         <tr>
-                                            <th class="ps-3">Payment Date</th>
-                                            <th>Payment Method</th>
-                                            <th class="text-end">Amount Paid</th>
-                                            <th class="text-end">Due Amount</th>
-                                            <th class="text-end pe-3">Reference</th>
+                                            <th>SL</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Payment Mode</th>
+                                            <th>Narration</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        @php
-                                            $totalPaid = DB::table('payments')->where('job_book_id', $jobBook->id)->sum('amount');
-                                            $dueAmount = ($jobBook->invoice_amount ?? 0) - $totalPaid;
-                                            $payments = DB::table('payments')->where('job_book_id', $jobBook->id)->get();
-                                        @endphp
-                                        @forelse($payments as $payment)
-                                        <tr>
-                                            <td class="ps-3">{{ $payment->payment_date ? \Carbon\Carbon::parse($payment->payment_date)->format('d M, Y') : 'N/A' }}</td>
-                                            <td>{{ ucfirst($payment->payment_method ?? 'N/A') }}</td>
-                                            <td class="text-end text-success fw-semibold">৳ {{ number_format($payment->amount ?? 0, 2) }}</td>
-                                            <td class="text-end text-danger fw-semibold">৳ {{ number_format($dueAmount, 2) }}</td>
-                                            <td class="text-end pe-3">{{ $payment->reference_no ?? 'N/A' }}</td>
-                                        </tr>
-                                        @empty
-                                        <tr>
-                                            <td colspan="5" class="text-center py-4 text-muted">No payment records found</td>
-                                        </tr>
-                                        @endforelse
+                                    <tbody id="show-payment-history-body">
+                                        <tr><td colspan="6" class="text-center">Loading...</td></tr>
                                     </tbody>
-                                    <tfoot class="bg-light">
-                                        <tr>
-                                            <th colspan="2" class="text-end fw-bold">Total Paid:</th>
-                                            <th class="text-end fw-bold text-success">৳ {{ number_format($totalPaid, 2) }}</th>
-                                            <th class="text-end fw-bold text-danger">৳ {{ number_format($dueAmount, 2) }}</th>
-                                            <th></th>
-                                        </tr>
-                                    </tfoot>
                                 </table>
                             </div>
                         </div>
                     </div>
-                </div> --}}
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this job? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Options Modal -->
+<div class="modal fade" id="printOptionsModal" tabindex="-1" role="dialog" aria-labelledby="printOptionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="printOptionsModalLabel">
+                    <i class="fas fa-print me-2"></i> Print Options
+                </h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-bold mb-3">Select documents to print:</p>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input print-option" value="parts" id="printParts">
+                    <label class="form-check-label fw-bold" for="printParts">Parts List</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input print-option" value="quotation" id="printQuotation">
+                    <label class="form-check-label fw-bold" for="printQuotation">Quotation</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input print-option" value="invoice" id="printInvoice">
+                    <label class="form-check-label fw-bold" for="printInvoice">Invoice</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmPrint">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal Section -->
+@include('admin.partials.payments.payment-section', ['inline' => false])
+
+@endsection
+
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@include('admin.partials.payments.payment-script')
+
 <script>
     $('#jobs-sidebar, #jobs-index-sidebar').addClass('active');
     $('#collapseJobs').addClass('show');
 
+    // Load payment history for show page
+    function loadShowPaymentHistory() {
+        var jobId = {{ $jobBook->id }};
+        $.ajax({
+            url: "{{ url('admin/job-books/get-payment-history') }}/" + jobId,
+            type: 'GET',
+            success: function(response) {
+                if (response.success && response.data.length > 0) {
+                    var html = '';
+                    $.each(response.data, function(i, p) {
+                        html += `<tr>
+                            <td>${i+1}</td>
+                            <td>${p.payment_date || '-'}</td>
+                            <td>৳ ${parseFloat(p.amount).toFixed(2)}</td>
+                            <td>${p.payment_mode || '-'}</td>
+                            <td>${p.narration || '-'}</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <button type="button" class="dropdown-item view-payment" data-id="${p.id}">
+                                                <i class="fas fa-eye me-2 text-info"></i> View
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item edit-payment" data-id="${p.id}">
+                                                <i class="fas fa-edit me-2 text-primary"></i> Edit
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item delete-payment" data-id="${p.id}">
+                                                <i class="fas fa-trash me-2 text-danger"></i> Delete
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                    $('#show-payment-history-body').html(html);
+                } else {
+                    $('#show-payment-history-body').html('<tr><td colspan="6" class="text-center">No payment records found</td></tr>');
+                }
+            },
+            error: function() {
+                $('#show-payment-history-body').html('<tr><td colspan="6" class="text-center text-danger">Failed to load payment history</td></tr>');
+            }
+        });
+    }
+
     $(document).ready(function() {
+        loadShowPaymentHistory();
 
         // Delete button handler
         $('.delete-btn').on('click', function() {
@@ -439,9 +596,7 @@
                 $.ajax({
                     url: "{{ route('admin.job-books.destroy', ['job_book' => ':id']) }}".replace(':id', id),
                     type: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
+                    data: { _token: '{{ csrf_token() }}' },
                     success: function(response) {
                         if (response.success) {
                             window.location.href = '{{ route("admin.job-books.index") }}';
@@ -456,6 +611,71 @@
             }
         });
     });
+
+    // Print functionality
+    var printJobId = null;
+    $(document).on('click', '.print-btn', function() {
+        printJobId = $(this).data('id');
+        $('.print-option').prop('checked', false);
+        $('#printOptionsModal').modal('show');
+    });
+
+    $('#confirmPrint').click(function() {
+        var selectedOptions = [];
+        $('.print-option:checked').each(function() {
+            selectedOptions.push($(this).val());
+        });
+        if (selectedOptions.length === 0) {
+            Swal.fire({ icon: 'warning', title: 'No Selection', text: 'Please select at least one document to print.' });
+            return;
+        }
+        $('#printOptionsModal').modal('hide');
+        Swal.fire({ title: 'Preparing documents...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        $.ajax({
+            url: "{{ url('admin/job-books/print') }}",
+            type: 'POST',
+            data: { _token: "{{ csrf_token() }}", job_id: printJobId, documents: selectedOptions },
+            success: function(response) {
+                Swal.close();
+                if (response.success && response.html) {
+                    var printTab = window.open();
+                    printTab.document.write(response.html);
+                    printTab.document.close();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error!', text: response.message || 'Failed to generate print documents.' });
+                }
+            },
+            error: function(xhr) {
+                Swal.close();
+                Swal.fire({ icon: 'error', title: 'Error!', text: xhr.responseJSON?.message || 'An error occurred.' });
+            }
+        });
+    });
+
+    // Payment button handler
+    $(document).on('click', '.payment-btn', function() {
+        var jobId = $(this).data('id');
+        var customerId = $(this).data('customer-id');
+
+        PaymentModal.init({
+            paymentFor: 'customer',
+            paymentForId: customerId,
+            type: 'job',
+            typeId: jobId,
+            getDetailsUrl: "{{ url('admin/job-books/get-payment-details') }}/" + jobId,
+            processUrl: "{{ url('admin/job-books/process-payment') }}",
+            updateUrl: "{{ url('admin/job-books/update-payment') }}",
+            getHistoryUrl: "{{ url('admin/job-books/get-payment-history') }}",
+            getPaymentUrl: "{{ url('admin/job-books/get-payment') }}",
+            deleteUrl: "{{ url('admin/job-books/delete-payment') }}",
+            modalTitle: 'Job Payment'
+        });
+    });
+
+    // Refresh payment history after payment success
+    $(document).on('paymentSuccess', function() {
+        loadShowPaymentHistory();
+        location.reload();
+    });
 </script>
-@endsection
 @endsection

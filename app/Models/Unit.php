@@ -12,5 +12,6 @@ class Unit extends Model
         'name',
         'status',
         'description',
+        'is_default',
     ];
 }
