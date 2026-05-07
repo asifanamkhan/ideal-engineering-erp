@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\PaymentHelper;
+use App\Helpers\SmsHelper;
 
 class ExpenseController extends Controller
 {
@@ -169,7 +170,7 @@ class ExpenseController extends Controller
                     throw new \Exception($result['message']);
                 }
             }
-
+            SmsHelper::sendForEvent('expense', 'expense_create', $expenseId);
             DB::commit();
 
             return redirect()->route('admin.expenses.index')

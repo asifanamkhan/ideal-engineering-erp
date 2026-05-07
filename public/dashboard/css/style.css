@@ -225,3 +225,6 @@ hr {
 .nav-link{
     border: none;
 }
+.card-header {
+    padding: 6px 1.25rem;
+}

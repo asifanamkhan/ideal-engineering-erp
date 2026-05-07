@@ -22,9 +22,6 @@ class PartsController extends Controller
                 ->addColumn('DT_RowIndex', function ($part) {
                     return $part->id;
                 })
-                ->addColumn('price', function ($part) {
-                    return $part->price ? number_format($part->price, 2) : 'N/A';
-                })
                 ->addColumn('status_badge', function ($part) {
                     $status = $part->status == 1 ? 'active' : 'inactive';
                     $badgeClass = $status === 'active' ? 'badge bg-success' : 'badge bg-danger';
@@ -50,7 +47,6 @@ class PartsController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:parts',
-            'price' => 'nullable|numeric|min:0',
             'brand' => 'nullable|string|max:100',
             'model' => 'nullable|string|max:100',
             'status' => 'nullable|boolean',

@@ -5,26 +5,26 @@
     <div class="card-body">
         <form id="salaryForm">
             <input type="hidden" name="employee_id" value="{{ $employee->id }}">
-            
+
             <div class="row">
                 <div class="col-md-4">
                     <div class="form-group mb-3">
                         <label for="basic_salary">Basic Salary <span class="text-danger">*</span></label>
-                        <input type="number" step="0.01" class="form-control" id="basic_salary" name="basic_salary" 
+                        <input type="number" step="0.01" class="form-control" id="basic_salary" name="basic_salary"
                                value="{{ $employee->basic_salary ?? 0 }}" required>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group mb-3">
                         <label for="total_allowance">Total Allowance</label>
-                        <input type="number" step="0.01" class="form-control" id="total_allowance" name="total_allowance" 
+                        <input type="number" step="0.01" class="form-control" id="total_allowance" name="total_allowance"
                                value="{{ $employee->total_allowance ?? 0 }}">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group mb-3">
                         <label for="total_deduction">Total Deduction</label>
-                        <input type="number" step="0.01" class="form-control" id="total_deduction" name="total_deduction" 
+                        <input type="number" step="0.01" class="form-control" id="total_deduction" name="total_deduction"
                                value="{{ $employee->total_deduction ?? 0 }}">
                     </div>
                 </div>
@@ -59,15 +59,22 @@
             </div>
 
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-6">
                     <div class="form-group mb-3">
-                        <label for="overtime_rate">Overtime Rate (per day)</label>
-                        <input type="number" step="0.01" class="form-control" id="overtime_rate" name="overtime_rate" 
+                        <label for="overtime_rate">Overtime Rate (per hour)</label>
+                        <input type="number" step="0.01" class="form-control" id="overtime_rate" name="overtime_rate"
                                value="{{ $employee->overtime_rate ?? 0 }}" placeholder="0.00">
                         <small class="text-muted">Amount per overtime day</small>
                     </div>
                 </div>
-                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="default_overtime_hour">Default Overtime Hours</label>
+                        <input type="number" step="0.5" class="form-control" id="default_overtime_hour" name="default_overtime_hour"
+                               value="{{ old('default_overtime_hour', $employee->default_overtime_hour ?? 0) }}">
+                        <small class="text-muted">Default hours will be auto-filled when entering overtime</small>
+                    </div>
+                </div>
             </div>
 
             <div class="text-center mt-3">
@@ -84,22 +91,22 @@
         let basic = parseFloat($('#basic_salary').val()) || 0;
         let allowance = parseFloat($('#total_allowance').val()) || 0;
         let deduction = parseFloat($('#total_deduction').val()) || 0;
-        
+
         let gross = basic + allowance - deduction;
-        
+
         // Update display
         $('#display_basic').text(basic.toFixed(2));
         $('#display_allowance').text(allowance.toFixed(2));
         $('#display_deduction').text(deduction.toFixed(2));
         $('#gross_salary').text(gross.toFixed(2));
     }
-    
+
     $(document).ready(function() {
         // Bind change events
         $('#basic_salary, #total_allowance, #total_deduction').on('keyup change', function() {
             calculateGross();
         });
-        
+
         // Initial calculation
         calculateGross();
     });

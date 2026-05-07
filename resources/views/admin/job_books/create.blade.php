@@ -9,48 +9,22 @@
         min-height: 38px;
     }
 
-    .part-row {
+    .description-row {
         background-color: #f8f9fc;
         transition: all 0.2s;
     }
 
-    .part-row:hover {
+    .description-row:hover {
         background-color: #f1f3f9;
     }
 
-    .remove-part {
+    .remove-description {
         cursor: pointer;
         color: #e74a3b;
     }
 
-    .remove-part:hover {
+    .remove-description:hover {
         color: #c0392b;
-    }
-
-    .table-calculations {
-        background-color: #f8f9fc;
-        font-weight: 600;
-    }
-
-    .calculation-row td {
-        padding: 10px;
-        border-top: 2px solid #dee2e6;
-    }
-
-    .price-input,
-    .qty-input {
-        background-color: #fff;
-    }
-
-    .price-input:focus,
-    .qty-input:focus {
-        background-color: #fff;
-    }
-
-    .compact-table td,
-    .compact-table th {
-        padding: 0.5rem;
-        vertical-align: middle;
     }
 </style>
 @endsection
@@ -92,12 +66,11 @@
             <div class="card-body">
                 <h5 class="mb-1"><i class="fas fa-info-circle me-2"></i> Job Information</h5>
                 <div class="row">
-                    <div class="col-md-8 row">
+                    <div class="col-md-12 row">
                         <div class="col-md-6">
-                            <div class="mb-1">
+                            <div class="mb-2">
                                 <label class="form-label fw-bold">Customer <span class="text-danger">*</span></label>
                                 <div class="d-flex gap-2">
-
                                     <select name="customer_id" id="customer_id" class="form-control" style="flex: 1;"
                                         required>
                                         <option value="">Search and select customer...</option>
@@ -110,51 +83,53 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <!-- Job Date -->
-                            <div class="mb-1">
+                            <div class="mb-2">
                                 <label class="form-label fw-bold">Job Date <span class="text-danger">*</span></label>
                                 <input type="date" name="job_date" class="form-control" value="{{ date('Y-m-d') }}"
                                     required>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <!-- Delivery Date (Default Today) -->
-                            <div class="mb-1">
+                            <div class="mb-2">
                                 <label class="form-label fw-bold">Delivery Date</label>
-                                <input type="date" name="delivery_date" class="form-control" value="{{ date('Y-m-d') }}">
+                                <input type="date" name="delivery_date" class="form-control"
+                                    value="{{ date('Y-m-d') }}">
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <!-- Engine -->
-                            <div class="mb-1">
+                            <div class="mb-2">
                                 <label class="form-label fw-bold">Engine</label>
-                                <input type="text" name="engine" class="form-control" placeholder="Enter engine details">
+                                <input type="text" name="engine" class="form-control"
+                                    placeholder="Enter engine details">
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="mb-1">
+                            <div class="mb-2">
+                                <label class="form-label fw-bold">Vehicle Registration No</label>
+                                <input type="text" name="vehicle_registration_no" class="form-control"
+                                    placeholder="Enter vehicle registration number">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
                                 <label class="form-label fw-bold">Job Status</label>
                                 <select name="job_status" class="form-control">
                                     <option value="pending">Pending</option>
                                     <option value="in_progress">In Progress</option>
                                     <option value="completed">Completed</option>
                                     <option value="cancelled">Cancelled</option>
+                                    <option value="delivered">Delivered</option>
                                 </select>
                             </div>
                         </div>
-
                         <div class="col-md-6">
-                            <div class="mb-1">
+                            <div class="mb-2">
                                 <label class="form-label fw-bold">Documents</label>
                                 <input type="file" name="documents" class="form-control">
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4 row">
-                        <div class="col-md-12">
-
-                            <!-- Assign To (Multiple) -->
-                            <div class="mb-1">
+                        <div class="col-md-6">
+                            <div class="mb-2">
                                 <label class="form-label fw-bold">Assign To</label>
                                 <select name="assign_to[]" id="assign_to" class="form-control" multiple>
                                     @foreach($employees as $employee)
@@ -164,109 +139,77 @@
                                 <small class="text-muted">You can select multiple employees</small>
                             </div>
                         </div>
-                        <div class="col-md-12">
-                            <div class="mb-1">
+                        {{-- <div class="col-md-12">
+                            <div class="mb-2">
                                 <label class="form-label fw-bold">Descriptions</label>
                                 <textarea name="descriptions" class="form-control" rows="4"
                                     placeholder="Enter job descriptions..."></textarea>
                             </div>
-
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Parts Selection Section -->
+        <!-- Job Descriptions Section -->
         <div class="card shadow mt-4">
             <div class="card-header bg-primary text-white">
-                <h6 class="mb-0"><i class="fas fa-microchip me-2"></i> Parts Selection</h6>
+                <h6 class="mb-0"><i class="fas fa-list me-2"></i> Job Descriptions</h6>
             </div>
             <div class="card-body">
-                <!-- Add Part Row - 3 columns with plus button -->
-                <div class="row mb-1 align-items-end">
-                    <div class="col-md-6 ">
-                        <label class="form-label fw-bold">Select Part <span class="text-danger">*</span></label>
+                <div class="row mb-3 align-items-end">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Select Job Description</label>
                         <div class="d-flex gap-2">
-                            <select id="part_id" class="form-control" style="width: 100%;">
-                                <option value=""></option>
-                                @foreach($parts as $part)
-                                <option value="{{ $part->id }}" data-name="{{ $part->name }}"
-                                    data-brand="{{ $part->brand }}" data-model="{{ $part->model }}"
-                                    data-price="{{ $part->price }}">
-                                    {{ $part->name }} - {{ $part->brand }} - {{ $part->model }}
+                            <select id="job_description_id" class="form-control" style="width: 100%;">
+                                <option value="">Select Description</option>
+                                @foreach($jobDescriptions as $desc)
+                                <option value="{{ $desc->id }}" data-description="{{ $desc->description }}">
+                                    {{ \Illuminate\Support\Str::limit($desc->description, 100) }}
                                 </option>
                                 @endforeach
                             </select>
                             <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                data-bs-target="#partModal" style="white-space: nowrap;">
+                                data-bs-target="#jobDescriptionModal" style="white-space: nowrap;">
                                 <i class="fas fa-plus-circle me-1"></i> New
                             </button>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold">Size <span class="text-danger">*</span></label>
-                        <select id="size_id" class="form-control">
-                            @foreach($sizes as $size)
-                                <option
-                                @if ($size->is_default == 1)
-                                    selected
-                                @endif value="{{ $size->id }}"> {{ $size->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label fw-bold">&nbsp;</label>
-                        <div class="">
-                            <button type="button" id="addPartBtn" class="btn btn-success w-100">
-                                <i class="fas fa-plus me-2"></i> Add Part
-                            </button>
-                        </div>
+                        <button type="button" id="addDescriptionBtn" class="btn btn-primary w-100">
+                            <i class="fas fa-plus me-2"></i> Add Description
+                        </button>
                     </div>
                 </div>
 
-                <!-- Parts Table (Compact) -->
                 <div class="table-responsive mt-3">
-                    <table class="table table-sm table-bordered compact-table" id="partsTable">
+                    <table class="table table-sm table-bordered" id="descriptionsTable">
                         <thead class="table-head">
                             <tr>
                                 <th width="5%">#</th>
-                                <th width="35%">Part Details</th>
-                                <th width="10%">Size</th>
-                                <th width="15%">Unit Price</th>
-                                <th width="10%">Qty</th>
-                                <th width="15%">Total</th>
+                                <th width="85%">Description</th>
                                 <th width="10%">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="partsTableBody">
+                        <tbody id="descriptionsTableBody">
                             <tr>
-                                <td colspan="7" class="text-center text-muted">No parts added</td>
+                                <td colspan="3" class="text-center text-muted">No descriptions added</td>
                             </tr>
                         </tbody>
-                        <tfoot class="table-calculations">
-                            <tr>
-                                <td colspan="4" class="text-end fw-bold">Total:</td>
-                                <td class="fw-bold" style="text-align: center" id="totalQuantity">0</td>
-                                <td class="fw-bold" style="text-align: right" id="totalPrice">0.00</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>
-            <div class="mt-4 mb-4 text-center">
-                <button type="reset" class="btn btn-lg btn-secondary px-4">
-                    <i class="fas fa-undo me-2"></i> Reset
-                </button>
-                <button onclick="return confirm('Are you sure you want to save this job?')" type="submit" class="btn btn-lg btn-success px-4">
-                    <i class="fas fa-save me-2"></i> Save Job
-                </button>
-            </div>
         </div>
 
-        <!-- Submit Buttons -->
-
+        <div class="mt-4 mb-4 text-center">
+            <button type="reset" class="btn btn-lg btn-secondary px-4">
+                <i class="fas fa-undo me-2"></i> Reset
+            </button>
+            <button type="submit" class="btn btn-lg btn-success px-4">
+                <i class="fas fa-save me-2"></i> Save Job
+            </button>
+        </div>
     </form>
 </div>
 
@@ -293,66 +236,43 @@
     </div>
 </div>
 
-<!-- Part Modal -->
-<div class="modal fade" id="partModal" tabindex="-1" aria-labelledby="partModalLabel" aria-hidden="true">
+<!-- Job Description Modal -->
+<div class="modal fade" id="jobDescriptionModal" tabindex="-1" aria-labelledby="jobDescriptionModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title text-white" id="partModalLabel">
-                    <i class="fas fa-microchip"></i> Add New Part
+                <h5 class="modal-title text-white" id="jobDescriptionModalLabel">
+                    <i class="fas fa-plus-circle"></i> Add New Job Description
                 </h5>
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">
                     <i class="fa fa-1x fa-times"></i>
                 </button>
             </div>
-            <form id="partForm">
+            <form id="jobDescriptionForm">
                 @csrf
                 <div class="modal-body">
-                    <div id="formErrors" class="alert alert-danger d-none"></div>
-
-                    <input type="hidden" id="part_id" name="part_id">
-
-                    <div class="mb-1">
-                        <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="name" name="name" required>
-                        <div class="invalid-feedback"></div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description <span
+                                class="text-danger">*</span></label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                     </div>
-
-                    <div class="mb-1">
-                        <label for="price" class="form-label">Price (per unit/size)</label>
-                        <input type="number" step="0.01" class="form-control" id="price" name="price">
-                        <div class="invalid-feedback"></div>
-                    </div>
-
-                    <div class="mb-1">
-                        <label for="brand" class="form-label">Brand name</label>
-                        <input type="text" class="form-control" id="brand" name="brand">
-                        <div class="invalid-feedback"></div>
-                    </div>
-
-                    <div class="mb-1">
-                        <label for="model" class="form-label">Model name</label>
-                        <input type="text" class="form-control" id="model" name="model">
-                        <div class="invalid-feedback"></div>
-                    </div>
-
-                    <div class="mb-1">
+                    <div class="mb-3">
                         <label for="status" class="form-label">Status</label>
-                        <select class="form-control" id="status" name="status">
+                        <select class="form-control" id="desc_status" name="status">
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
                         </select>
                     </div>
-
-                    <div class="mb-1">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                        <div class="invalid-feedback"></div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <input type="checkbox" name="is_default" value="1"> Set as Default
+                        </label>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="savePartBtn">Save Part</button>
+                    <button type="submit" class="btn btn-primary" id="saveJobDescriptionBtn">Save Description</button>
                 </div>
             </form>
         </div>
@@ -365,404 +285,265 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
-    // Activate sidebar
-    $('#jobs-sidebar, #jobs-index-sidebar').addClass('active');
-    $('#collapseJobs').addClass('show');
+        $('#jobs-sidebar, #jobs-index-sidebar').addClass('active');
+        $('#collapseJobs').addClass('show');
 
-    // Toggle business fields based on type selection
-    $(document).on('change', '#type', function() {
-        if ($(this).val() === 'business') {
-            $('.business-fields').show();
-        } else {
-            $('.business-fields').hide();
+        let descriptionItems = [];
+        let rowCounter = 0;
+
+        // ========== CUSTOMER SELECT2 (Working) ==========
+        $('#customer_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Search and select customer',
+            allowClear: true,
+            width: '100%',
+            ajax: {
+                url: "{{ route('admin.customers.search') }}",
+                type: 'GET',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        search: params.term,
+                        page: params.page || 1
+                    };
+                },
+                processResults: function(data, params) {
+                    params.page = params.page || 1;
+                    return {
+                        results: data.results,
+                        pagination: {
+                            more: data.pagination.more
+                        }
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 1,
+            templateResult: formatCustomer,
+            templateSelection: formatCustomerSelection
+        });
+
+        function formatCustomer(customer) {
+            if (customer.loading) return customer.text;
+            var $container = $(
+                '<div><strong>' + customer.name + '</strong><br><small>' +
+                (customer.phone ? '📞 ' + customer.phone + ' | ' : '') +
+                (customer.email ? '✉️ ' + customer.email : '') + '</small></div>'
+            );
+            return $container;
         }
-    });
 
-    // Initialize Select2 for Customer with AJAX
-    $('#customer_id').select2({
-        theme: 'bootstrap-5',
-        placeholder: 'Search and select customer',
-        allowClear: true,
-        width: '100%',
-        ajax: {
-            url: "{{ route('admin.customers.search') }}",
-            type: 'GET',
-            dataType: 'json',
-            delay: 250,
-            data: function(params) {
-                return {
-                    search: params.term,
-                    page: params.page || 1
-                };
-            },
-            processResults: function(data, params) {
-                params.page = params.page || 1;
-                return {
-                    results: data.results,
-                    pagination: {
-                        more: data.pagination.more
-                    }
-                };
-            },
-            cache: true
-        },
-        minimumInputLength: 1,
-        templateResult: formatCustomer,
-        templateSelection: formatCustomerSelection
-    });
+        function formatCustomerSelection(customer) {
+            return customer.name || customer.text;
+        }
+        // ===============================================
 
-    function formatCustomer(customer) {
-        if (customer.loading) return customer.text;
-        var $container = $(
-            '<div><strong>' + customer.name + '</strong><br><small>' +
-            (customer.phone ? '📞 ' + customer.phone + ' | ' : '') +
-            (customer.email ? '✉️ ' + customer.email : '') + '</small></div>'
-        );
-        return $container;
-    }
+        // ========== ASSIGN TO SELECT2 ==========
+        $('#assign_to').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select employees',
+            allowClear: true,
+            width: '100%'
+        });
+        // =======================================
 
-    function formatCustomerSelection(customer) {
-        return customer.name || customer.text;
-    }
+        // ========== JOB DESCRIPTION SELECT2 (Without AJAX, simple) ==========
+        $('#job_description_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select Description',
+            allowClear: true,
+            width: '100%'
+        });
+        // =======================================
 
-    // Initialize Select2 for Part (without AJAX, just search)
-    $('#part_id').select2({
-        theme: 'bootstrap-5',
-        placeholder: 'Search and select part',
-        allowClear: true,
-        width: '100%',
-    });
-
-    // Initialize Select2 for Assign To (Multiple)
-    $('#assign_to').select2({
-        theme: 'bootstrap-5',
-        placeholder: 'Select employees',
-        allowClear: true,
-        width: '100%'
-    });
-
-    // Auto focus on Select2 search
-    $('#customer_id').on('select2:open', function(e) {
-        setTimeout(function() {
-            var $searchField = $('.select2-container--open .select2-search__field');
-            if ($searchField.length) {
-                $searchField[0].focus();
-            }
-        }, 100);
-    });
-
-// Handle Customer Modal Save
-$('#saveCustomerBtn').click(function() {
-    var customerData = {
-        name: $('#customerModal #name').val(),
-        email: $('#customerModal #email').val(),
-        phone: $('#customerModal #phone').val(),
-        type: $('#customerModal #type').val(),
-        reference: $('#customerModal #reference').val(),
-        address: $('#customerModal #address').val(),
-        opening_bal: $('#customerModal #opening_bal').val(),
-        status: $('#customerModal #status').val(),
-        business_name: $('#customerModal #business_name').val(),
-        business_phone: $('#customerModal #business_phone').val(),
-        tax_no: $('#customerModal #tax_no').val(),
-        business_address: $('#customerModal #business_address').val(),
-        _token: '{{ csrf_token() }}'
-    };
-
-    var saveBtn = $(this);
-    saveBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
-
-    $.ajax({
-        url: "{{ route('admin.customers.store') }}",
-        type: 'POST',
-        data: customerData,
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                // Add new customer to Select2 using the response data
-                if (response.customer) {
-                    var newOption = new Option(response.customer.name, response.customer.id, true, true);
-                    $('#customer_id').append(newOption).trigger('change');
+        // Auto focus on Select2 search
+        $('#customer_id').on('select2:open', function(e) {
+            setTimeout(function() {
+                var $searchField = $('.select2-container--open .select2-search__field');
+                if ($searchField.length) {
+                    $searchField[0].focus();
                 }
+            }, 100);
+        });
 
-                // Close modal and reset form
-                $('#customerModal').modal('hide');
+        // Add Description Button
+        $('#addDescriptionBtn').click(function() {
+            var descriptionId = $('#job_description_id').val();
+            var descriptionText = $('#job_description_id option:selected').data('description');
 
-                // Reset the form
-                if ($('#customerModal form').length) {
-                    $('#customerModal form')[0].reset();
-                }
-                $('.business-fields').hide();
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: response.message || 'Customer added successfully',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: response.message || 'Failed to add customer'
-                });
-            }
-        },
-        error: function(xhr) {
-            var errorMessage = 'Failed to add customer';
-            if (xhr.responseJSON && xhr.responseJSON.errors) {
-                errorMessage = Object.values(xhr.responseJSON.errors).flat().join('\n');
-            } else if (xhr.responseJSON && xhr.responseJSON.error) {
-                errorMessage = xhr.responseJSON.error;
+            if (!descriptionId) {
+                Swal.fire('Error', 'Please select a description', 'error');
+                return;
             }
 
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: errorMessage
+            var existingIndex = descriptionItems.findIndex(d => d.description_id == descriptionId);
+            if (existingIndex !== -1) {
+                Swal.fire('Warning', 'This description already exists!', 'warning');
+                return;
+            }
+
+            descriptionItems.push({
+                temp_id: rowCounter++,
+                description_id: descriptionId,
+                description_text: descriptionText
             });
-        },
-        complete: function() {
-            saveBtn.prop('disabled', false).html('Save Customer');
-        }
-    });
-});
 
-// Handle Part Form Submit
-$('#partForm').submit(function(e) {
+            renderDescriptionTable();
+            $('#job_description_id').val('').trigger('change');
+        });
+
+        function renderDescriptionTable() {
+            var tbody = $('#descriptionsTableBody');
+            tbody.empty();
+
+            if (descriptionItems.length === 0) {
+                tbody.append('<tr><td colspan="3" class="text-center text-muted">No descriptions added</td></tr>');
+                return;
+            }
+
+            $.each(descriptionItems, function(index, item) {
+                var row = `
+                    <tr class="description-row">
+                        <td>${index + 1}</td>
+                        <td>
+                            ${item.description_text}
+                            <input type="hidden" name="descriptions[${index}][description_id]" value="${item.description_id}">
+                        </td>
+                        <td class="text-center">
+                            <i class="fas fa-trash-alt remove-description text-danger" data-index="${index}" style="cursor: pointer;"></i>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+
+        $(document).on('click', '.remove-description', function() {
+            var index = $(this).data('index');
+            descriptionItems.splice(index, 1);
+            renderDescriptionTable();
+        });
+
+        // Save Job Description Modal
+$('#jobDescriptionForm').submit(function(e) {
     e.preventDefault();
 
-    var partData = {
-        name: $('#partForm #name').val(),
-        price: $('#partForm #price').val(),
-        brand: $('#partForm #brand').val(),
-        model: $('#partForm #model').val(),
-        status: $('#partForm #status').val(),
-        description: $('#partForm #description').val(),
+    var formData = {
+        description: $('#description').val(),
+        status: $('#desc_status').val(),
+        is_default: $('#is_default').is(':checked') ? 1 : 0,
         _token: '{{ csrf_token() }}'
     };
 
-    var saveBtn = $('#savePartBtn');
+    var saveBtn = $('#saveJobDescriptionBtn');
     saveBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
 
     $.ajax({
-        url: "{{ route('admin.parts.store') }}",
+        url: "{{ route('admin.job_descriptions.store') }}",
         type: 'POST',
-        data: partData,
+        data: formData,
         dataType: 'json',
         success: function(response) {
-            if (response.success) {
-                // Add new part to Select2
-                if (response.part) {
-                    var optionText = response.part.name;
-                    if (response.part.brand || response.part.model) {
-                        optionText = response.part.name + ' - ' + (response.part.brand || '') + ' ' + (response.part.model || '');
-                    }
+            if (response.success && response.data) {
+                var newOption = new Option(response.data.description, response.data.id, false, false);
+                newOption.setAttribute('data-description', response.data.description);
+                $('#job_description_id').append(newOption);
 
-                    var newOption = new Option(optionText, response.part.id, false, false);
-                    newOption.setAttribute('data-name', response.part.name);
-                    newOption.setAttribute('data-brand', response.part.brand || '');
-                    newOption.setAttribute('data-model', response.part.model || '');
-                    newOption.setAttribute('data-price', response.part.price || 0);
-                    $('#part_id').append(newOption);
-                }
+                $('#jobDescriptionModal').modal('hide');
+                $('#jobDescriptionForm')[0].reset();
+                $('#is_default').prop('checked', false);
 
-                // Close modal and reset form
-                $('#partModal').modal('hide');
-                $('#partForm')[0].reset();
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: response.message || 'Part added successfully',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                Swal.fire('Success!', 'Job description added successfully', 'success');
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: response.message || 'Failed to add part'
-                });
+                Swal.fire('Error!', response.message || 'Failed to add description', 'error');
             }
         },
         error: function(xhr) {
-            var errorMessage = 'Failed to add part';
-            if (xhr.responseJSON && xhr.responseJSON.errors) {
-                errorMessage = Object.values(xhr.responseJSON.errors).flat().join('\n');
-            } else if (xhr.responseJSON && xhr.responseJSON.error) {
-                errorMessage = xhr.responseJSON.error;
+            console.log(xhr);
+            var errorMsg = 'Failed to add description';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
             }
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: errorMessage
-            });
+            Swal.fire('Error!', errorMsg, 'error');
         },
         complete: function() {
-            saveBtn.prop('disabled', false).html('Save Part');
+            saveBtn.prop('disabled', false).html('Save Description');
         }
     });
 });
 
-    // Parts Array
-    let partsList = [];
-    let rowCounter = 0;
+        // Handle Customer Modal Save
+        $('#saveCustomerBtn').click(function() {
+            var customerData = {
+                name: $('#customerModal #name').val(),
+                email: $('#customerModal #email').val(),
+                phone: $('#customerModal #phone').val(),
+                type: $('#customerModal #type').val(),
+                reference: $('#customerModal #reference').val(),
+                address: $('#customerModal #address').val(),
+                opening_bal: $('#customerModal #opening_bal').val(),
+                status: $('#customerModal #status').val(),
+                business_name: $('#customerModal #business_name').val(),
+                business_phone: $('#customerModal #business_phone').val(),
+                tax_no: $('#customerModal #tax_no').val(),
+                business_address: $('#customerModal #business_address').val(),
+                _token: '{{ csrf_token() }}'
+            };
 
-    // Add Part to Table
-    $('#addPartBtn').click(function() {
-        var partId = $('#part_id').val();
-        var partName = $('#part_id option:selected').data('name') || $('#part_id option:selected').text().split(' - ')[0];
-        var partBrand = $('#part_id option:selected').data('brand');
-        var partModel = $('#part_id option:selected').data('model');
-        var partPrice = parseFloat($('#part_id option:selected').data('price'));
-        var sizeId = $('#size_id').val();
-        var sizeName = $('#size_id option:selected').text();
+            var saveBtn = $(this);
+            saveBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
 
-        if (!partId) {
-            Swal.fire('Error', 'Please select a part', 'error');
-            return;
-        }
-        if (!sizeId) {
-            Swal.fire('Error', 'Please select a size', 'error');
-            return;
-        }
+            $.ajax({
+                url: "{{ route('admin.customers.store') }}",
+                type: 'POST',
+                data: customerData,
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        if (response.customer) {
+                            var newOption = new Option(response.customer.name, response.customer.id, true, true);
+                            $('#customer_id').append(newOption).trigger('change');
+                        }
+                        $('#customerModal').modal('hide');
+                        if ($('#customerModal form').length) {
+                            $('#customerModal form')[0].reset();
+                        }
+                        $('.business-fields').hide();
 
-        // Check if part already exists
-        var existingIndex = partsList.findIndex(p => p.part_id == partId && p.size_id == sizeId);
-        if (existingIndex !== -1) {
-            Swal.fire('Warning', 'This part with same size already exists!', 'warning');
-            return;
-        }
-
-        var quantity = 1;
-        var totalPrice = partPrice * quantity;
-
-        var partData = {
-            temp_id: rowCounter++,
-            part_id: partId,
-            part_name: partName,
-            part_brand: partBrand || '',
-            part_model: partModel || '',
-            size_id: sizeId,
-            size_name: sizeName,
-            price: partPrice || 0,
-            quantity: quantity,
-            total: totalPrice
-        };
-
-        partsList.push(partData);
-        renderPartsTable();
-        calculateTotals();
-
-        // Reset selection
-        $('#part_id').val('').trigger('change');
-    });
-
-    // Render Parts Table
-    function renderPartsTable() {
-        var tbody = $('#partsTableBody');
-        tbody.empty();
-
-        if (partsList.length === 0) {
-            tbody.append('<tr><td colspan="7" class="text-center text-muted">No parts added</td></tr>');
-            return;
-        }
-
-        $.each(partsList, function(index, part) {
-            console.log(part);
-            var row = `
-                <tr class="part-row">
-                    <td>${index + 1}</td>
-                    <td>
-                        <strong>${part.part_name}</strong><br>
-                        <small class="text-muted">${part.part_brand} - ${part.part_model}</small>
-                        <input type="hidden" name="parts[${index}][part_id]" value="${part.part_id}">
-                        <input type="hidden" name="parts[${index}][size_id]" value="${part.size_id}">
-                    </td>
-                    <td>${part.size_name}</td>
-                    <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm  price-input" data-index="${index}" value="${part.price.toFixed(2)}" style="width: 100px;">
-                    </td>
-                    <td>
-                        <input type="number" class="form-control qty-input" data-index="${index}" value="${part.quantity}" min="1" style="width: 70px;">
-                    </td>
-                    <td class="total-price-${index}" style="text-align: right;">${part.total.toFixed(2)}</td>
-                    <td class="text-center">
-                        <i class="fas fa-trash-alt remove-part text-danger" data-index="${index}" style="cursor: pointer;"></i>
-                    </td>
-                </tr>
-            `;
-            tbody.append(row);
-        });
-    }
-
-    // Handle Price Change
-    $(document).on('change input', '.price-input', function() {
-        var index = $(this).data('index');
-        var newPrice = parseFloat($(this).val());
-        if (!isNaN(newPrice) && newPrice >= 0) {
-            partsList[index].price = newPrice;
-            partsList[index].total = partsList[index].price * partsList[index].quantity;
-            $(`.total-price-${index}`).text(partsList[index].total.toFixed(2));
-            calculateTotals();
-        }
-    });
-
-    // Handle Quantity Change
-    $(document).on('change input', '.qty-input', function() {
-        var index = $(this).data('index');
-        var newQty = parseInt($(this).val());
-        if (!isNaN(newQty) && newQty >= 1) {
-            partsList[index].quantity = newQty;
-            partsList[index].total = partsList[index].price * partsList[index].quantity;
-            $(`.total-price-${index}`).text(partsList[index].total.toFixed(2));
-            calculateTotals();
-        }
-    });
-
-    // Remove Part
-    $(document).on('click', '.remove-part', function() {
-        var index = $(this).data('index');
-        partsList.splice(index, 1);
-        renderPartsTable();
-        calculateTotals();
-    });
-
-    // Calculate Totals - Only total price sum, not quantity sum
-    function calculateTotals() {
-        var totalPrice = 0;
-        var totalQty = 0;
-
-        $.each(partsList, function(index, part) {
-            totalQty += part.quantity;  // This sums quantity
-            totalPrice += part.total;
-        });
-
-        $('#totalQuantity').text(totalQty);
-        $('#totalPrice').text(totalPrice.toFixed(2));
-    }
-
-    // Form Submit - Add hidden inputs for parts
-    $('#jobForm').submit(function(e) {
-        if (partsList.length === 0) {
-            e.preventDefault();
-            Swal.fire('Error', 'Please add at least one part to the job', 'error');
-            return false;
-        }
-
-        // Add parts data to form
-        var form = $(this);
-        partsList.forEach(function(part, idx) {
-            form.append(`<input type="hidden" name="job_parts[${idx}][part_id]" value="${part.part_id}">`);
-            form.append(`<input type="hidden" name="job_parts[${idx}][size_id]" value="${part.size_id}">`);
-            form.append(`<input type="hidden" name="job_parts[${idx}][quantity]" value="${part.quantity}">`);
-            form.append(`<input type="hidden" name="job_parts[${idx}][single_price]" value="${part.price}">`);
-            form.append(`<input type="hidden" name="job_parts[${idx}][total_price]" value="${part.total}">`);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: response.message || 'Customer added successfully',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: response.message || 'Failed to add customer'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    var errorMessage = 'Failed to add customer';
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        errorMessage = Object.values(xhr.responseJSON.errors).flat().join('\n');
+                    } else if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMessage = xhr.responseJSON.error;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: errorMessage
+                    });
+                },
+                complete: function() {
+                    saveBtn.prop('disabled', false).html('Save Customer');
+                }
+            });
         });
     });
-});
 </script>
 @endsection

@@ -8,6 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\PaymentHelper;
+use App\Helpers\SmsHelper;
+
+
+
 
 class JobBookController extends Controller
 {
@@ -70,48 +74,48 @@ class JobBookController extends Controller
                             <span class="badge bg-info">' . $job_date . '</span>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <span class="fw-bold"><i class="fas fa-truck me-1"></i> Delivery:</span>
+                            <span class="fw-bold"><i class="fas fa-truck me-1"></i> Del:</span>
                             <span class="badge bg-primary">' . $delivery_date . '</span>
                         </div>
                     </div>
                     ';
                 })
                 ->addColumn('engine', function ($job_book) {
-                    return $job_book->engine ? e($job_book->engine) : 'N/A';
+
+                    return '
+                    <div class="w-100">
+                        <div class="d-flex gap-2 mb-1">
+                            <span class="fw-bold"><i class="fas fa-car me-1"></i> &nbsp;</span>
+                            <span>' . e($job_book->vehicle_registration_no ?? 'N/A') . '</span>
+                        </div>
+                        ' . ($job_book->customer_phone ? '
+                        <div class="d-flex gap-2 mb-1">
+                            <span class="fw-bold"><i class="fas fa-cog me-1"></i> &nbsp;</span>
+                            <span>' . e($job_book->engine ?? 'N/A') . '</span>
+                        </div>
+                        ' : '') . '
+                    </div>
+                    ';
                 })
                 ->addColumn('status_badge', function ($job_book) {
                     $job_status = $job_book->job_status ?? 'pending';
-                    $parts_status = $job_book->parts_status ?? 'not_received';
-
                     // Job Status Badges
                     $jobBadges = [
                         'pending' => 'badge bg-warning',
                         'in_progress' => 'badge bg-info',
                         'completed' => 'badge bg-success',
-                        'cancelled' => 'badge bg-danger'
+                        'cancelled' => 'badge bg-danger',
+                        'delivered' => 'badge bg-primary'
                     ];
                     $jobBadgeClass = $jobBadges[$job_status] ?? 'badge bg-secondary';
                     $jobStatusText = ucfirst(str_replace('_', ' ', $job_status));
 
-                    // Parts Status Badges
-                    $partsBadges = [
-                        'received' => 'badge bg-success',
-                        'not_received' => 'badge bg-danger',
-                        'partial' => 'badge bg-warning'
-                    ];
-                    $partsBadgeClass = $partsBadges[$parts_status] ?? 'badge bg-secondary';
-                    $partsStatusText = ucfirst(str_replace('_', ' ', $parts_status));
-
                     return '
                     <div class="w-100">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span class="fw-bold"><i class="fas fa-chart-line me-1"></i> Job:</span>
+                        <div class="">
                             <span class="' . $jobBadgeClass . '">' . $jobStatusText . '</span>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="fw-bold"><i class="fas fa-microchip me-1"></i> Parts:</span>
-                            <span class="' . $partsBadgeClass . '">' . $partsStatusText . '</span>
-                        </div>
+
                     </div>
                     ';
                 })
@@ -152,7 +156,7 @@ class JobBookController extends Controller
                     } else {
                         $actionText = '<a href="' . route('admin.job-quotations.create', ['job_id' => $job_book->id]) . '" class="w-100">Generate Quotation</a>';
                         return '
-                            <div class="w-100 text-center">
+                            <div class="w-100 ">
                                 ' . $actionText . '
                             </div>
                         ';
@@ -194,16 +198,27 @@ class JobBookController extends Controller
                     } else {
                         $actionText = '<a href="' . route('admin.job-invoices.create', ['job_id' => $job_book->id]) . '" class="w-100">generate Invoice</a>';
                         return '
-                            <div class="w-100 text-center">
+                            <div class="w-100">
                                 ' . $actionText . '
                             </div>
                         ';
                     }
                 })
                 ->addColumn('action', function ($job_book) {
-                    return view('admin.job_books.partials.action-btn-view', ['id' => $job_book->id, 'customer_id' => $job_book->customer_id])->render();
+                    // Check if quotation exists and invoice not exists
+                    $hasQuotation = !is_null($job_book->quotation_date);
+                    $hasInvoice = !is_null($job_book->invoice_date);
+                    $showConvertBtn = $hasQuotation && !$hasInvoice;
+
+                    return view('admin.job_books.partials.action-btn-view', [
+                        'id' => $job_book->id,
+                        'customer_id' => $job_book->customer_id,
+                        'show_convert_btn' => $showConvertBtn,
+                        'job_status' => $job_book->job_status ?? 'pending',
+                        'delivery_date' => $job_book->delivery_date,
+                    ])->render();
                 })
-                ->rawColumns(['customer', 'date', 'status_badge', 'quotation', 'invoice', 'action'])
+                ->rawColumns(['customer', 'engine', 'date', 'status_badge', 'quotation', 'invoice', 'action'])
                 ->make(true);
         }
 
@@ -216,32 +231,30 @@ class JobBookController extends Controller
             ->where('status', 1)
             ->select('id', 'name')
             ->get();
-        $parts = DB::table('parts')->orderBy('id', 'desc')->where('status', 1)->get();
-        $sizes = DB::table('sizes')->where('status', 1)->get();
 
-        return view('admin.job_books.create', compact('employees', 'parts', 'sizes'));
+        $jobDescriptions = DB::table('job_descriptions')
+            ->where('status', 1)
+            ->select('id', 'description')
+            ->orderBy('is_default', 'desc')
+            ->get();
+
+        return view('admin.job_books.create', compact('employees', 'jobDescriptions'));
     }
 
     public function store(Request $request)
     {
-        // dd($request->input());
-        // Validate the request
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required|exists:customers,id',
             'job_date' => 'required|date',
             'delivery_date' => 'nullable|date',
             'engine' => 'nullable|string|max:100',
+            'vehicle_registration_no' => 'nullable|string|max:100',
             'job_status' => 'required|in:pending,in_progress,completed,cancelled',
-            'descriptions' => 'nullable|string',
             'documents' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:2048',
             'assign_to' => 'nullable|array',
             'assign_to.*' => 'exists:employees,id',
-            'job_parts' => 'required|array|min:1',
-            'job_parts.*.part_id' => 'required|exists:parts,id',
-            'job_parts.*.size_id' => 'required|exists:sizes,id',
-            'job_parts.*.quantity' => 'required|integer|min:1',
-            'job_parts.*.single_price' => 'required|numeric|min:0',
-            'job_parts.*.total_price' => 'required|numeric|min:0'
+            'descriptions' => 'nullable|array',  // শুধু একবার
+            'descriptions.*.description_id' => 'required|exists:job_descriptions,id'
         ]);
 
         if ($validator->fails()) {
@@ -252,25 +265,15 @@ class JobBookController extends Controller
             DB::beginTransaction();
 
             // Handle documents upload
-
             $photoPath = null;
             if ($request->hasFile('documents') && $request->file('documents')->isValid()) {
-                try {
-                    $photoFile = $request->file('documents');
-
-                    // Generate unique filename
-                    $filename = time() . '_' . uniqid() . '.' . $photoFile->getClientOriginalExtension();
-
-                    // Store in public/uploads/employees folder
-                    $photoPath = 'public/uploads/job-books/' . $filename;
-                    $photoFile->move(public_path('uploads/job-books'), $filename);
-                } catch (\Exception $e) {
-                    $photoPath = null;
-                }
+                $photoFile = $request->file('documents');
+                $filename = time() . '_' . uniqid() . '.' . $photoFile->getClientOriginalExtension();
+                $photoPath = 'public/uploads/job-books/' . $filename;  // 'public/' বাদ দিন
+                $photoFile->move(public_path('uploads/job-books'), $filename);
             }
 
-
-            // Generate Job ID (e.g., JOB-00001)
+            // Generate Job ID
             $lastJob = DB::table('job_books')->orderBy('id', 'desc')->first();
             $lastId = $lastJob ? $lastJob->id : 0;
             $jobId = 'JOB-' . str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
@@ -284,44 +287,35 @@ class JobBookController extends Controller
             // Insert into job_books
             $jobBookId = DB::table('job_books')->insertGetId([
                 'job_id' => $jobId,
-                'branch_id' => 1,
+                'branch_id' => auth()->user()->branch_id ?? 1,
                 'customer_id' => $request->customer_id,
                 'job_date' => $request->job_date,
                 'delivery_date' => $request->delivery_date,
                 'engine' => $request->engine,
-                'descriptions' => $request->descriptions,
+                'vehicle_registration_no' => $request->vehicle_registration_no,
                 'job_status' => $request->job_status,
                 'parts_status' => 'not_received',
                 'documents' => $photoPath,
-                'assign_to' => $assignToString, // Store as comma-separated string
+                'assign_to' => $assignToString,
+                'created_by' => auth()->id(),
                 'created_at' => now(),
-                'updated_at' => now(),
-                'created_by' => auth()->user()->id
+                'updated_at' => now()
             ]);
 
-            // Insert parts into job_parts
-            $totalPartsPrice = 0;
-            foreach ($request->job_parts as $part) {
-                DB::table('job_parts')->insert([
-                    'job_book_id' => $jobBookId,
-                    'parts_id' => $part['part_id'],
-                    'size_id' => $part['size_id'],
-                    'quantity' => $part['quantity'],
-                    'single_price' => $part['single_price'],
-                    'total_price' => $part['total_price'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $totalPartsPrice += $part['total_price'];
+            // Insert into job_description_details
+            if ($request->has('descriptions') && is_array($request->descriptions)) {
+                foreach ($request->descriptions as $desc) {
+                    DB::table('job_description_details')->insert([
+                        'job_book_id' => $jobBookId,
+                        'job_description_id' => $desc['description_id'],
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
             }
 
-            // Update total price in job_books
-            DB::table('job_books')->where('id', $jobBookId)->update([
-                'parts_amount' => $totalPartsPrice,
-                'updated_at' => now(),
-            ]);
-
             DB::commit();
+            SmsHelper::sendForEvent('job', 'job_create', $jobBookId);
 
             return redirect()->route('admin.job-books.index')
                 ->with('success', 'Job created successfully! Job ID: ' . $jobId);
@@ -369,24 +363,64 @@ class JobBookController extends Controller
             ->leftJoin('parts', 'job_parts.parts_id', '=', 'parts.id')
             ->leftJoin('sizes', 'job_parts.size_id', '=', 'sizes.id')
             ->where('job_parts.job_book_id', $id)
-            ->select('job_parts.*', 'parts.name as part_name',  'sizes.name as size_name')
+            ->select('job_parts.*', 'parts.name as part_name', 'sizes.name as size_name')
             ->get();
 
-        // Get quotations
+        // Get job descriptions
+        $jobDescriptions = DB::table('job_description_details')
+            ->leftJoin('job_descriptions', 'job_description_details.job_description_id', '=', 'job_descriptions.id')
+            ->where('job_description_details.job_book_id', $id)
+            ->select('job_description_details.*', 'job_descriptions.description')
+            ->get();
+
+        // Get quotations with unit and VAT info
         $quotations = DB::table('job_quotations')
             ->leftJoin('services', 'job_quotations.service_id', '=', 'services.id')
+            ->leftJoin('units', 'job_quotations.unit_id', '=', 'units.id')
             ->where('job_quotations.job_book_id', $id)
-            ->select('job_quotations.*', 'services.name as service_name')
+            ->select(
+                'job_quotations.*',
+                'services.name as service_name',
+                'units.name as unit_name'
+            )
             ->get();
 
-        // Get invoices
+        // Get invoices with unit and VAT info
         $invoices = DB::table('job_invoices')
             ->leftJoin('services', 'job_invoices.service_id', '=', 'services.id')
+            ->leftJoin('units', 'job_invoices.unit_id', '=', 'units.id')
             ->where('job_invoices.job_book_id', $id)
-            ->select('job_invoices.*', 'services.name as service_name')
+            ->select(
+                'job_invoices.*',
+                'services.name as service_name',
+                'units.name as unit_name'
+            )
             ->get();
 
-        return view('admin.job_books.show', compact('jobBook', 'jobParts', 'quotations', 'invoices'));
+        // Calculate totals
+        $quotationSubtotal = $quotations->sum('total_price');
+        $quotationVatAmount = ($quotationSubtotal * ($jobBook->quotation_vat ?? 0)) / 100;
+        $quotationGrandTotal = $quotationSubtotal + $quotationVatAmount;
+
+        $invoiceSubtotal = $invoices->sum('total_price');
+        $invoiceDiscount = $jobBook->invoice_discount ?? 0;
+        $invoiceVatAmount = $jobBook->invoice_vat_amount ?? 0;
+        $invoiceGrandTotal = $invoiceSubtotal - $invoiceDiscount + $invoiceVatAmount;
+
+        return view('admin.job_books.show', compact(
+            'jobBook',
+            'jobParts',
+            'jobDescriptions',
+            'quotations',
+            'invoices',
+            'quotationSubtotal',
+            'quotationVatAmount',
+            'quotationGrandTotal',
+            'invoiceSubtotal',
+            'invoiceDiscount',
+            'invoiceVatAmount',
+            'invoiceGrandTotal'
+        ));
     }
 
     public function edit($id)
@@ -397,8 +431,7 @@ class JobBookController extends Controller
         }
 
         $employees = DB::table('employees')->where('status', 1)->get();
-        $parts = DB::table('parts')->orderBy('id', 'desc')->where('status', 1)->get();
-        $sizes = DB::table('sizes')->where('status', 1)->get();
+        $jobDescriptions = DB::table('job_descriptions')->where('status', 1)->get();
 
         // Get assigned employees IDs
         $assignedEmployees = [];
@@ -406,62 +439,59 @@ class JobBookController extends Controller
             $assignedEmployees = explode(',', $jobBook->assign_to);
         }
 
+        // Get existing job descriptions
+        $existingDescriptions = DB::table('job_description_details')
+            ->leftJoin('job_descriptions', 'job_description_details.job_description_id', '=', 'job_descriptions.id')
+            ->where('job_description_details.job_book_id', $id)
+            ->select('job_description_details.*', 'job_descriptions.description')
+            ->get();
+
         // Get customer data
         $jobBook->customer = DB::table('customers')->where('id', $jobBook->customer_id)->first();
 
-        return view('admin.job_books.edit', compact('jobBook', 'employees', 'parts', 'sizes', 'assignedEmployees'));
+        return view('admin.job_books.edit', compact('jobBook', 'employees', 'jobDescriptions', 'assignedEmployees', 'existingDescriptions'));
     }
 
     public function update(Request $request, $id)
     {
-        // Validate the request
         $validator = Validator::make($request->all(), [
             'customer_id' => 'required|exists:customers,id',
             'job_date' => 'required|date',
             'delivery_date' => 'nullable|date',
             'engine' => 'nullable|string|max:100',
+            'vehicle_registration_no' => 'nullable|string|max:100',
             'job_status' => 'required|in:pending,in_progress,completed,cancelled',
-            'descriptions' => 'nullable|string',
             'documents' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:2048',
             'assign_to' => 'nullable|array',
             'assign_to.*' => 'exists:employees,id',
-            'job_parts' => 'required|array|min:1',
-            'job_parts.*.part_id' => 'required|exists:parts,id',
-            'job_parts.*.size_id' => 'required|exists:sizes,id',
-            'job_parts.*.quantity' => 'required|integer|min:1',
-            'job_parts.*.single_price' => 'required|numeric|min:0',
-            'job_parts.*.total_price' => 'required|numeric|min:0'
+            'descriptions' => 'nullable|array',
+            'descriptions.*.description_id' => 'required|exists:job_descriptions,id'
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-        $job_book = DB::table('job_books')->where('id', $id)->first();
 
-        if (!$job_book) {
-            return redirect()->route('admin.job-books.index')
-                ->with('error', 'Job not found');
+        $jobBook = DB::table('job_books')->where('id', $id)->first();
+
+        if (!$jobBook) {
+            return redirect()->route('admin.job-books.index')->with('error', 'Job not found');
         }
+
         try {
             DB::beginTransaction();
 
-            // Handle photo upload
-            $photoPath = $job_book->documents; // Keep existing photo by default
-
+            // Handle documents upload
+            $photoPath = $jobBook->documents;
             if ($request->hasFile('documents') && $request->file('documents')->isValid()) {
-                try {
-                    // Delete old photo if exists
-                    if ($job_book->documents && file_exists(public_path($job_book->documents))) {
-                        unlink(public_path($job_book->documents));
-                    }
-
-                    $photoFile = $request->file('documents');
-                    $filename = time() . '_' . uniqid() . '.' . $photoFile->getClientOriginalExtension();
-                    $photoPath = 'public/uploads/job-books/' . $filename;
-                    $photoFile->move(public_path('uploads/job-books'), $filename);
-                } catch (\Exception $e) {
-                    $photoPath = $job_book->documents; // Keep old photo on error
+                // Delete old file
+                if ($jobBook->documents && file_exists(public_path($jobBook->documents))) {
+                    unlink(public_path($jobBook->documents));
                 }
+                $photoFile = $request->file('documents');
+                $filename = time() . '_' . uniqid() . '.' . $photoFile->getClientOriginalExtension();
+                $photoPath = 'public/uploads/job-books/' . $filename;
+                $photoFile->move(public_path('uploads/job-books'), $filename);
             }
 
             // Convert assign_to array to comma-separated string
@@ -476,63 +506,44 @@ class JobBookController extends Controller
                 'job_date' => $request->job_date,
                 'delivery_date' => $request->delivery_date,
                 'engine' => $request->engine,
-                'descriptions' => $request->descriptions,
+                'vehicle_registration_no' => $request->vehicle_registration_no,
                 'job_status' => $request->job_status,
                 'documents' => $photoPath,
                 'assign_to' => $assignToString,
-                'updated_at' => now(),
+                'updated_at' => now()
             ]);
 
-            // Update parts - delete old parts and insert new ones
-            // Or update existing ones based on ID
-
-            $existingPartIds = [];
-            $totalPartsPrice = 0;
-
-            foreach ($request->job_parts as $part) {
-                if (isset($part['id']) && !empty($part['id'])) {
-                    // Update existing part
-                    DB::table('job_parts')->where('id', $part['id'])->update([
-                        'parts_id' => $part['part_id'],
-                        'size_id' => $part['size_id'],
-                        'quantity' => $part['quantity'],
-                        'single_price' => $part['single_price'],
-                        'total_price' => $part['total_price'],
-                        'updated_at' => now(),
+            // Update descriptions
+            $existingIds = [];
+            foreach ($request->descriptions as $desc) {
+                if (isset($desc['id']) && !empty($desc['id'])) {
+                    // Update existing
+                    DB::table('job_description_details')->where('id', $desc['id'])->update([
+                        'job_description_id' => $desc['description_id'],
+                        'updated_at' => now()
                     ]);
-                    $existingPartIds[] = $part['id'];
+                    $existingIds[] = $desc['id'];
                 } else {
-                    // Insert new part
-                    $newId = DB::table('job_parts')->insertGetId([
+                    // Insert new
+                    $newId = DB::table('job_description_details')->insertGetId([
                         'job_book_id' => $id,
-                        'parts_id' => $part['part_id'],
-                        'size_id' => $part['size_id'],
-                        'quantity' => $part['quantity'],
-                        'single_price' => $part['single_price'],
-                        'total_price' => $part['total_price'],
+                        'job_description_id' => $desc['description_id'],
                         'created_at' => now(),
-                        'updated_at' => now(),
+                        'updated_at' => now()
                     ]);
-                    $existingPartIds[] = $newId;
+                    $existingIds[] = $newId;
                 }
-                $totalPartsPrice += $part['total_price'];
             }
 
-            // Delete parts that were removed
-            DB::table('job_parts')
+            // Delete removed descriptions
+            DB::table('job_description_details')
                 ->where('job_book_id', $id)
-                ->whereNotIn('id', $existingPartIds)
+                ->whereNotIn('id', $existingIds)
                 ->delete();
-
-            // Update total price
-            DB::table('job_books')->where('id', $id)->update([
-                'parts_amount' => $totalPartsPrice,
-                'updated_at' => now(),
-            ]);
 
             DB::commit();
 
-            return redirect()->route('admin.job-books.edit', $id)
+            return redirect()->route('admin.job-books.index')
                 ->with('success', 'Job updated successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -541,6 +552,7 @@ class JobBookController extends Controller
                 ->withInput();
         }
     }
+
 
     public function destroy($id)
     {
@@ -595,304 +607,150 @@ class JobBookController extends Controller
         $job = DB::table('job_books')
             ->leftJoin('customers', 'job_books.customer_id', '=', 'customers.id')
             ->where('job_books.id', $id)
-            ->select('job_books.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.address as customer_address')
+            ->select(
+                'job_books.*',
+                'customers.name as customer_name',
+                'customers.phone as customer_phone',
+                'customers.address as customer_address'
+            )
             ->first();
 
+        // Get quotation items
         $services = DB::table('job_quotations')
             ->where('job_book_id', $id)
             ->join('services', 'job_quotations.service_id', '=', 'services.id')
-            ->leftJoin('units', 'job_quotations.unit_id', '=', 'units.id')  // Add this join
+            ->leftJoin('units', 'job_quotations.unit_id', '=', 'units.id')
             ->select(
                 'job_quotations.*',
-                'services.name as service_name',
-                'units.name as unit_name',      // Add unit name
-                'units.id as unit_id'           // Add unit id
-            )
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'job' => $job,
-            'services' => $services
-        ]);
-    }
-    public function quotationCreate()
-    {
-        $services = DB::table('services')->where('status', 1)->get();
-        $units = DB::table('units')->where('status', 1)->get();
-        return view('admin.job_books.quotations', compact('services', 'units'));
-    }
-    public function storeQuotation(Request $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $totalAmount = 0;
-            foreach ($request->services as $service) {
-                $totalAmount += $service['total'];
-            }
-
-            // First, delete existing quotations for this job
-            DB::table('job_quotations')->where('job_book_id', $request->job_id)->delete();
-
-            // Insert new services
-            foreach ($request->services as $service) {
-                DB::table('job_quotations')->insert([
-                    'job_book_id' => $request->job_id,
-                    'service_id' => $service['service_id'],
-                    'unit_id' => $service['unit_id'],
-                    'quantity' => $service['quantity'],
-                    'price' => $service['price'],
-                    'total_price' => $service['total'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-
-            // Update job_books table with quotation info
-            DB::table('job_books')->where('id', $request->job_id)->update([
-                'quotation_date' => $request->quotation_date,
-                'quotation_description' => $request->quotation_description,
-                'quotation_amount' => $totalAmount,
-                'quotation_status' => $request->quotation_status ?? 'not_send', // Add this line
-                'updated_at' => now(),
-            ]);
-
-            DB::commit();
-
-            return response()->json(['success' => true, 'message' => 'Quotation saved successfully!']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
-
-    public function invoiceCreate($job_id = null)
-    {
-        $services = DB::table('services')->where('status', 1)->get();
-        $units = DB::table('units')->where('status', 1)->get();
-        return view('admin.job_books.invoice', compact('services', 'units', 'job_id'));
-    }
-
-    public function getInvoiceDetails($id)
-    {
-        $job = DB::table('job_books')
-            ->leftJoin('customers', 'job_books.customer_id', '=', 'customers.id')
-            ->where('job_books.id', $id)
-            ->select('job_books.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.address as customer_address')
-            ->first();
-
-        $services = DB::table('job_invoices')
-            ->where('job_book_id', $id)
-            ->join('services', 'job_invoices.service_id', '=', 'services.id')
-            ->leftJoin('units', 'job_invoices.unit_id', '=', 'units.id')  // Add this join
-            ->select(
-                'job_invoices.*',
                 'services.name as service_name',
                 'units.name as unit_name',
                 'units.id as unit_id'
             )
             ->get();
 
+        // Get quotation ID if exists
+        $quotationId = DB::table('job_quotations')->where('job_book_id', $id)->value('id');
+
         return response()->json([
             'success' => true,
             'job' => $job,
-            'services' => $services
+            'services' => $services,
+            'quotation_id' => $quotationId
         ]);
     }
-    public function storeInvoice(Request $request)
-    {
-        try {
-            DB::beginTransaction();
 
-            // Delete existing invoice services
-            DB::table('job_invoices')->where('job_book_id', $request->job_id)->delete();
-
-            // Insert new services
-            foreach ($request->services as $service) {
-                DB::table('job_invoices')->insert([
-                    'job_book_id' => $request->job_id,
-                    'service_id' => $service['service_id'],
-                    'unit_id' => $service['unit_id'],
-                    'quantity' => $service['quantity'],
-                    'price' => $service['price'],
-                    'total_price' => $service['total'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-
-            // Update job_books table with invoice info
-            DB::table('job_books')->where('id', $request->job_id)->update([
-                'invoice_date' => $request->invoice_date,
-                'invoice_amount' => $request->invoice_amount,
-                'invoice_discount' => $request->invoice_discount,
-                'invoice_description' => $request->invoice_description,
-                'invoice_status' => $request->invoice_status,
-                'updated_at' => now(),
-            ]);
-
-            // ========== পেমেন্ট অংশ যোগ করো ==========
-            if ($request->payment_amount && $request->payment_amount > 0) {
-                $job = DB::table('job_books')->where('id', $request->job_id)->first();
-                $paymentData = $request->payment_data;
-
-                $additionalData = [
-                    'narration' => $request->narration,
-                    'chq_no' => $paymentData['chq_no'] ?? null,
-                    'chq_date' => $paymentData['chq_date'] ?? null,
-                    'card_no' => $paymentData['card_no'] ?? null,
-                    'online_trx_id' => $paymentData['online_trx_id'] ?? null,
-                    'online_trx_dt' => $paymentData['online_trx_dt'] ?? null,
-                    'mfs_name' => $paymentData['mfs_name'] ?? null,
-                    'bank_code' => $paymentData['bank_code'] ?? null,
-                    'bank_ac_no' => $paymentData['bank_ac_no'] ?? null,
-                ];
-
-                $entityData = [
-                    'table' => 'job_books',
-                    'amount_field' => 'invoice_amount',
-                    'discount_field' => 'invoice_discount',
-                    'paid_field' => 'invoice_paid_amount',
-                    'status_field' => 'invoice_status'
-                ];
-
-                $result = $this->paymentHelper->processPayment(
-                    'customer',
-                    $job->customer_id,
-                    'job',
-                    $request->job_id,
-                    $request->payment_amount,
-                    $request->payment_mode_id,
-                    $additionalData,
-                    $entityData
-                );
-
-                if (!$result['success']) {
-                    throw new \Exception($result['message']);
-                }
-            }
-            // ======================================
-
-            DB::commit();
-
-            return response()->json(['success' => true, 'message' => 'Invoice saved successfully!']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
 
     public function print(Request $request)
-    {
-        try {
-            $jobId = $request->job_id;
-            $documents = $request->documents;
+{
+    try {
+        $jobId = $request->job_id;
+        $documents = $request->documents;
 
-            // Fetch job data using DB queries
-            $job = DB::table('job_books')
-                ->where('id', $jobId)
-                ->first();
+        // Fetch job data using DB queries
+        $job = DB::table('job_books')
+            ->where('id', $jobId)
+            ->first();
 
-            if (!$job) {
-                throw new \Exception('Job not found');
-            }
+        if (!$job) {
+            throw new \Exception('Job not found');
+        }
 
-            // Fetch customer data
-            $customer = DB::table('customers')
-                ->where('id', $job->customer_id)
-                ->first();
+        // Fetch customer data
+        $customer = DB::table('customers')
+            ->where('id', $job->customer_id)
+            ->first();
 
-            // Fetch job parts
-            $jobParts = DB::table('job_parts')
-                ->leftJoin('parts', 'job_parts.parts_id', '=', 'parts.id')
-                ->leftJoin('sizes', 'job_parts.size_id', '=', 'sizes.id')
-                ->where('job_parts.job_book_id', $jobId)
-                ->select(
-                    'job_parts.*',
-                    'parts.name as part_name',
-                    'sizes.name as size_name',
-                    'parts.description as part_description'
-                )
-                ->get();
+        // Fetch job parts
+        $jobParts = DB::table('job_parts')
+            ->leftJoin('parts', 'job_parts.parts_id', '=', 'parts.id')
+            ->leftJoin('sizes', 'job_parts.size_id', '=', 'sizes.id')
+            ->where('job_parts.job_book_id', $jobId)
+            ->select(
+                'job_parts.*',
+                'parts.name as part_name',
+                'sizes.name as size_name',
+                'parts.description as part_description'
+            )
+            ->get();
 
-            // Fetch quotation items
-            $quotationItems = DB::table('job_quotations')
-                ->leftJoin('services', 'job_quotations.service_id', '=', 'services.id')
-                ->leftJoin('units', 'job_quotations.unit_id', '=', 'units.id')
-                ->where('job_quotations.job_book_id', $jobId)
-                ->select(
-                    'job_quotations.*',
-                    'services.name as service_name',
-                    'services.description as service_description',
-                    'units.name as unit_name'
-                )
-                ->get();
+        // Fetch quotation items
+        $quotationItems = DB::table('job_quotations')
+            ->leftJoin('services', 'job_quotations.service_id', '=', 'services.id')
+            ->leftJoin('units', 'job_quotations.unit_id', '=', 'units.id')
+            ->where('job_quotations.job_book_id', $jobId)
+            ->select(
+                'job_quotations.*',
+                'services.name as service_name',
+                'services.description as service_description',
+                'units.name as unit_name'
+            )
+            ->get();
 
-            // Fetch invoice items
-            $invoiceItems = DB::table('job_invoices')
-                ->leftJoin('services', 'job_invoices.service_id', '=', 'services.id')
-                ->leftJoin('units', 'job_invoices.unit_id', '=', 'units.id')
-                ->where('job_invoices.job_book_id', $jobId)
-                ->select(
-                    'job_invoices.*',
-                    'services.name as service_name',
-                    'services.description as service_description',
-                    'units.name as unit_name'
-                )
-                ->get();
+        // Fetch invoice items
+        $invoiceItems = DB::table('job_invoices')
+            ->leftJoin('services', 'job_invoices.service_id', '=', 'services.id')
+            ->leftJoin('units', 'job_invoices.unit_id', '=', 'units.id')
+            ->where('job_invoices.job_book_id', $jobId)
+            ->select(
+                'job_invoices.*',
+                'services.name as service_name',
+                'services.description as service_description',
+                'units.name as unit_name'
+            )
+            ->get();
 
-            // Prepare job data
-            $jobData = (object) [
-                'id' => $job->id,
-                'job_id' => $job->job_id,
-                'date' => $job->job_date,
-                'engine' => $job->engine,
-                'status' => $job->job_status,
-                'description' => $job->descriptions,
-                'parts_status' => $job->parts_status,
-                'delivery_date' => $job->delivery_date,
-                'parts_amount' => $job->parts_amount,
+        // Prepare job data
+        $jobData = (object) [
+            'id' => $job->id,
+            'job_id' => $job->job_id,
+            'date' => $job->job_date,
+            'engine' => $job->engine,
+            'status' => $job->job_status,
+            'description' => $job->descriptions,
+            'parts_status' => $job->parts_status,
+            'delivery_date' => $job->delivery_date,
+            'parts_amount' => $job->parts_amount,
+            'customer' => $customer,
+            'jobParts' => $jobParts,
+            'quotation' => (object)[
+                'quotation_date' => $job->quotation_date,
+                'quotation_amount' => $job->quotation_amount,
+                'quotation_description' => $job->quotation_description,
+                'quotation_status' => $job->quotation_status,
+                'quotation_vat' => $job->quotation_vat ?? 0,
+                'quotation_vat_type' => $job->quotation_vat_type ?? 'include',
+                'quotation_vat_amount' => $job->quotation_vat_amount ?? 0,
+                'items' => $quotationItems
+            ],
+            'invoice' => (object)[
+                'invoice_date' => $job->invoice_date,
                 'invoice_amount' => $job->invoice_amount,
                 'invoice_discount' => $job->invoice_discount,
-                'quotation_amount' => $job->quotation_amount,
-                'quotation_date' => $job->quotation_date,
-                'invoice_date' => $job->invoice_date,
-                'customer' => $customer,
-                'jobParts' => $jobParts,
-                'quotation' => (object)[
-                    'quotation_date' => $job->quotation_date,
-                    'quotation_amount' => $job->quotation_amount,
-                    'quotation_description' => $job->quotation_description,
-                    'quotation_status' => $job->quotation_status,
-                    'items' => $quotationItems
-                ],
-                'invoice' => (object)[
-                    'invoice_date' => $job->invoice_date,
-                    'invoice_amount' => $job->invoice_amount,
-                    'invoice_discount' => $job->invoice_discount,
-                    'invoice_description' => $job->invoice_description,
-                    'invoice_status' => $job->invoice_status,
-                    'invoice_paid_amount' => $job->invoice_paid_amount ?? 0,
-                    'items' => $invoiceItems
-                ]
-            ];
+                'invoice_transport_cost' => $job->invoice_transport_cost ?? 0,
+                'invoice_vat' => $job->invoice_vat ?? 0,
+                'invoice_vat_type' => $job->invoice_vat_type ?? 'include',
+                'invoice_vat_amount' => $job->invoice_vat_amount ?? 0,
+                'invoice_description' => $job->invoice_description,
+                'invoice_status' => $job->invoice_status,
+                'invoice_paid_amount' => $job->invoice_paid_amount ?? 0,
+                'items' => $invoiceItems
+            ]
+        ];
 
-            // Generate HTML for print
-            $html = view('admin.job_books.prints.print-layout', compact('jobData', 'documents'))->render();
+        // Generate HTML for print
+        $html = view('admin.job_books.prints.print-layout', compact('jobData', 'documents'))->render();
 
-            return response()->json([
-                'success' => true,
-                'html' => $html
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'html' => $html
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
     }
-
+}
     public function getPaymentDetails($id)
     {
         $entityData = [
@@ -1056,5 +914,137 @@ class JobBookController extends Controller
             default:
                 return [];
         }
+    }
+
+    public function changeStatus(Request $request)
+    {
+        try {
+            $request->validate([
+                'job_id' => 'required|exists:job_books,id',
+                'job_status' => 'required|in:pending,in_progress,completed,cancelled,delivered'
+            ]);
+
+            $updateData = [
+                'job_status' => $request->job_status,
+                'updated_at' => now()
+            ];
+
+            // If status is delivered, update delivery_date
+            if ($request->job_status === 'delivered' && $request->delivery_date) {
+                $updateData['delivery_date'] = $request->delivery_date;
+            }
+
+            DB::table('job_books')->where('id', $request->job_id)->update($updateData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Job status updated successfully!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update status: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function printChallan(Request $request)
+    {
+        try {
+            $jobId = $request->job_id;
+            $formats = $request->formats;
+
+            // Fetch job data
+            $job = DB::table('job_books')
+                ->where('id', $jobId)
+                ->first();
+
+            if (!$job) {
+                throw new \Exception('Job not found');
+            }
+
+            // Fetch customer data
+            $customer = DB::table('customers')
+                ->where('id', $job->customer_id)
+                ->first();
+
+            // Attach customer to job object
+            $job->customer = $customer;
+
+            // Fetch job descriptions (for without_service format)
+            $jobDescriptions = DB::table('job_description_details')
+                ->leftJoin('job_descriptions', 'job_description_details.job_description_id', '=', 'job_descriptions.id')
+                ->where('job_description_details.job_book_id', $jobId)
+                ->select('job_descriptions.description')
+                ->get();
+
+            $job->descriptions = $jobDescriptions;
+
+            // Fetch invoice items (for with_service format)
+            $invoiceItems = DB::table('job_invoices')
+                ->leftJoin('services', 'job_invoices.service_id', '=', 'services.id')
+                ->leftJoin('units', 'job_invoices.unit_id', '=', 'units.id')
+                ->where('job_invoices.job_book_id', $jobId)
+                ->select(
+                    'job_invoices.*',
+                    'services.name as service_name',
+                    'units.name as unit_name'
+                )
+                ->get();
+
+            // Calculate totals
+            $subtotal = 0;
+            foreach ($invoiceItems as $item) {
+                $item->total_price = ($item->quantity ?? 0) * ($item->price ?? 0);
+                $subtotal += $item->total_price;
+            }
+
+            $discount = $job->invoice_discount ?? 0;
+            $vatPercent = $job->invoice_vat ?? 0;
+            $afterDiscount = $subtotal - $discount;
+            $vatAmount = ($afterDiscount * $vatPercent) / 100;
+            $grandTotal = $afterDiscount + $vatAmount;
+            $paidAmount = $job->invoice_paid_amount ?? 0;
+            $dueAmount = $grandTotal - $paidAmount;
+
+            // Create invoice object with all data
+            $job->invoice = (object)[
+                'invoice_date' => $job->invoice_date ?? $job->job_date,
+                'invoice_discount' => $discount,
+                'invoice_vat' => $vatPercent,
+                'invoice_paid_amount' => $paidAmount,
+                'subtotal' => $subtotal,
+                'grand_total' => $grandTotal,
+                'due_amount' => $dueAmount,
+                'items' => $invoiceItems
+            ];
+
+            // Pass job and formats to view
+            $html = view('admin.job_books.prints.challan', compact('job', 'formats'))->render();
+
+            return response()->json([
+                'success' => true,
+                'html' => $html
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getDescriptions($id)
+    {
+        $descriptions = DB::table('job_description_details')
+            ->leftJoin('job_descriptions', 'job_description_details.job_description_id', '=', 'job_descriptions.id')
+            ->where('job_description_details.job_book_id', $id)
+            ->select('job_descriptions.description')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'descriptions' => $descriptions
+        ]);
     }
 }

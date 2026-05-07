@@ -35,7 +35,7 @@
                             <th>Name</th>
                             <th>Brand</th>
                             <th>Model</th>
-                            <th>Price</th>
+                            {{-- <th>Price</th> --}}
                             <th>Status</th>
                             <th>Description</th>
                             <th>Actions</th>
@@ -71,11 +71,11 @@
                         <div class="invalid-feedback"></div>
                     </div>
 
-                    <div class="mb-3">
+                    {{-- <div class="mb-3">
                         <label for="price" class="form-label">Price (per unit/size)</label>
                         <input type="number" step="0.01" class="form-control" id="price" name="price">
                         <div class="invalid-feedback"></div>
-                    </div>
+                    </div> --}}
 
                     <div class="mb-3">
                         <label for="price" class="form-label">Brand name</label>
@@ -134,9 +134,9 @@
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, width: '5%' },
                 { data: 'name', name: 'name', width: '20%' },
-                { data: 'brand', name: 'name', width: '10%' },
-                { data: 'model', name: 'name', width: '15%' },
-                { data: 'price', name: 'price', width: '10%', className: 'text-center' },
+                { data: 'brand', name: 'name', width: '15%' },
+                { data: 'model', name: 'name', width: '20%' },
+                // { data: 'price', name: 'price', width: '10%', className: 'text-center' },
                 { data: 'status_badge', name: 'status', width: '10%', orderable: false, searchable: false, className: 'text-center' },
                 { data: 'description', name: 'description', width: '30%' },
                 { data: 'action', name: 'action', orderable: false, searchable: false, width: '5%', className: 'text-center' }

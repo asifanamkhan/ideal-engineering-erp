@@ -1,5 +1,8 @@
 <div class="invoice-wrapper no-page-break">
-    @include('admin.partials.print-header', ['logo' => ''])
+    @php
+        $invoice_settings = DB::table('invoice_settings')->first();
+    @endphp
+    @include('admin.partials.print-header', ['logo' => 'uploads/logo.png','invoice_settings' => $invoice_settings])
 
     <div class="to-section">
         <div>
@@ -11,6 +14,8 @@
             @endif
         </div>
         <div>
+            <span style="font-weight:bold;">Engine:</span> {{ $job->engine ?? 'N/A' }}
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span style="font-weight:bold;">Job ID:</span> {{ $job->job_id ?? 'N/A' }}
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span style="font-weight:bold;">Date:</span> {{ date('d/m/Y', strtotime($job->invoice->invoice_date ?? $job->date)) }}
@@ -57,34 +62,46 @@
 
     @php
         $discount = $job->invoice->invoice_discount ?? 0;
-        $totalAmount = $subtotal - $discount;
+        $transportCost = $job->invoice->invoice_transport_cost ?? 0;
+        $vatPercent = $job->invoice->invoice_vat ?? 0;
+        $vatType = $job->invoice->invoice_vat_type ?? 'include';
+
+        $afterDiscount = $subtotal - $discount;
+        $afterTransport = $afterDiscount + $transportCost;
+
+        if ($vatType == 'include' && $vatPercent > 0) {
+            $vatAmount = ($afterTransport * $vatPercent) / (100 + $vatPercent);
+            $totalAmount = $afterTransport;
+        } else {
+            $vatAmount = ($afterTransport * $vatPercent) / 100;
+            $totalAmount = $afterTransport + $vatAmount;
+        }
+
         $paidAmount = $job->invoice->invoice_paid_amount ?? 0;
         $dueAmount = $totalAmount - $paidAmount;
 
-        // Payment Status
         $paymentStatus = 'UNPAID';
         if ($paidAmount >= $totalAmount) {
             $paymentStatus = 'PAID';
         } elseif ($paidAmount > 0) {
             $paymentStatus = 'PARTIAL PAID';
         }
+
+        $rowCount = 1;
+        if ($discount > 0) $rowCount++;
+        if ($transportCost > 0) $rowCount++;
+        if ($vatType == 'exclude' && $vatPercent > 0) $rowCount++;
+        $rowCount++;
+        $rowCount++;
+        $rowCount++;
     @endphp
 
-    <!-- Totals Table with Payment Status in Left Cell (rowspan) -->
     <table class="total-section" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-        @php
-            $rowCount = 1; // for subtotal
-            if ($discount > 0) $rowCount++;
-            $rowCount++; // for grand total
-            $rowCount++; // for paid amount
-            $rowCount++; // for due amount
-        @endphp
 
-        <!-- Payment Status Row with rowspan -->
         <tr>
             <td rowspan="{{ $rowCount }}" style="width: 70%; text-align: left; padding: 6px; vertical-align: top;">
-                <div style="border: 2px solid #000; padding: 4px 12px; font-weight: bold; font-size: 12px; display: inline-block;">
-                    {{ $paymentStatus }}
+                <div style="">
+                    {{-- {{ $paymentStatus }} --}}
                 </div>
             </td>
             <td style="width: 30%; text-align: right; padding: 6px; font-weight: bold;">Subtotal:</td>
@@ -98,19 +115,35 @@
         </tr>
         @endif
 
-        <!-- Grand Total -->
+        @if($transportCost > 0)
+        <tr>
+            <td style="text-align: right; padding: 6px; font-weight: bold;">Transport Cost:</td>
+            <td style="text-align: right; padding: 6px; border-bottom: 1px solid #ddd;">{{ number_format($transportCost, 2) }}</td>
+        </tr>
+        @endif
+
+        @if($vatType == 'exclude' && $vatPercent > 0)
+        <tr>
+            <td style="text-align: right; padding: 6px; font-weight: bold;">VAT ({{ $vatPercent }}%):</td>
+            <td style="text-align: right; padding: 6px; border-bottom: 1px solid #ddd;">{{ number_format($vatAmount, 2) }}</td>
+        </tr>
+        @endif
+
         <tr style="border-top: 2px solid #000;">
-            <td style="text-align: right; padding: 8px; font-weight: bold; font-size: 14px;">Grand Total:</td>
+            <td style="text-align: right; padding: 8px; font-weight: bold; font-size: 14px;">
+                Grand Total
+                @if($vatType == 'include')
+                    <span style="font-size: 11px; font-weight: normal;">(Incl. VAT & TAX)</span>
+                @endif
+            </td>
             <td style="text-align: right; padding: 8px; font-weight: bold; font-size: 14px;">{{ number_format($totalAmount, 2) }}</td>
         </tr>
 
-        <!-- Paid Amount -->
         <tr style="border-top: 1px solid #000;">
             <td style="text-align: right; padding: 6px; font-weight: bold;">Paid Amount:</td>
             <td style="text-align: right; padding: 6px;">{{ number_format($paidAmount, 2) }}</td>
         </tr>
 
-        <!-- Due Amount -->
         <tr>
             <td style="text-align: right; padding: 6px; font-weight: bold;">Due Amount:</td>
             <td style="text-align: right; padding: 6px; border-bottom: 1px solid #ddd;">{{ number_format($dueAmount, 2) }}</td>
@@ -118,7 +151,7 @@
     </table>
 
     <div class="words-section" style="margin-top: 15px;">
-        <strong>In Words:</strong> {{ App\Helpers\NumberToWords::convert($totalAmount, 'Taka') }} Taka only.
+        <strong>In Words:</strong> {{ App\Helpers\NumberToWords::convert($totalAmount, 'Taka') }}.
     </div>
 
     <div class="bill-footer" style="display: flex; justify-content: space-between; margin-top: 40px;">
@@ -130,3 +163,8 @@
         </div>
     </div>
 </div>
+@if($invoice_settings && $invoice_settings->footer_text)
+<div class="invoice-footer" style="margin-top: 20px; text-align: center; font-size: 11px; color: #666; border-top: 1px solid #ddd; padding-top: 10px;">
+    {!! $invoice_settings->footer_text !!}
+</div>
+@endif

@@ -1,3 +1,5 @@
+{{-- resources/views/admin/job_books/quotations.blade.php --}}
+
 @extends('layouts.dashboard.app')
 
 @section('css')
@@ -37,65 +39,44 @@
         background-color: #fff;
     }
 
-
-    .job-info-card {
-        background-color: #f8f9fc;
-        border-left: 4px solid #4e73df;
+    .info-card {
+        background: #f8f9fc;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-left: 3px solid #4e73df;
     }
 
-    .badge {
-        padding: 5px 10px;
+    .info-label {
+        font-size: 11px;
+        color: #858796;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 3px;
+    }
+
+    .info-value {
+        font-size: 13px;
         font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
+        color: #2c3e50;
     }
 
-    .badge.bg-info {
-        background-color: #36b9cc !important;
-        color: white;
+    .description-item {
+        background: #fff;
+        border: 1px solid #e3e6f0;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        border-radius: 6px;
     }
 
-    .badge.bg-success {
-        background-color: #1cc88a !important;
-        color: white;
-    }
-
-    .badge.bg-secondary {
-        background-color: #858796 !important;
-        color: white;
-    }
-
-    .badge.bg-warning {
-        background-color: #f6c23e !important;
-        color: #212529;
-    }
-
-    .badge.bg-primary {
-        background-color: #4e73df !important;
-        color: white;
-    }
-
-    .badge.bg-danger {
-        background-color: #e74a3b !important;
-        color: white;
-    }
-
-    .form-control-sm-custom {
-        font-size: 0.875rem;
-        padding: 0.25rem 0.5rem;
-        height: auto;
-    }
-
-    .unit-select {
-        min-width: 100px;
+    #vatPercentRow {
+        transition: all 0.3s ease;
     }
 </style>
 @endsection
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Header -->
     <div class="page-header">
         <div class="d-flex align-items-center justify-content-between">
             <div>
@@ -109,7 +90,6 @@
         </div>
     </div>
 
-    <!-- Display Messages -->
     @if($errors->any())
     <div class="alert alert-danger alert-dismissible fade show py-2" role="alert">
         <i class="fas fa-exclamation-circle me-2"></i>
@@ -125,12 +105,11 @@
     <form id="quotationForm">
         @csrf
 
-        <!-- Job Search Section -->
         <div class="card shadow">
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="mb-3">
+                        <div class="mb-2">
                             <label class="form-label fw-bold">Search Job <span class="text-danger">*</span></label>
                             <select id="job_id" class="form-control" style="width: 100%;" required>
                                 <option value="">Search and select job...</option>
@@ -138,87 +117,94 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Job Information Display -->
-
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-6 ">
-                <div class="card shadow mt-2" id="jobInfo" style="display: none;">
-                    <div class="card-body">
-                        <div class="job-info-card p-3 rounded">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <small class="text-muted">Job ID</small>
-                                    <p class="fw-bold mb-0" id="displayJobId">-</p>
-                                </div>
-                                <div class="col-md-3">
-                                    <small class="text-muted">Job Status</small>
-                                    <p class="mb-0" id="displayJobStatus">-</p>
-                                </div>
-                                <div class="col-md-3">
-                                    <small class="text-muted">Job Date</small>
-                                    <p class="fw-bold mb-0" id="displayJobDate">-</p>
-                                </div>
-                                <div class="col-md-3">
-                                    <small class="text-muted">Engine</small>
-                                    <p class="fw-bold mb-0" id="displayEngine">-</p>
-                                </div>
-                                <div class="col-md-12">
-                                    <small class="text-muted">Descrption</small>
-                                    <p class="fw-bold mb-0" id="displayDescription">-</p>
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-md-4">
-                                    <small class="text-muted">Customer</small>
-                                    <p class="fw-bold mb-0" id="displayCustomer">-</p>
-                                </div>
-                                <div class="col-md-3">
-                                    <small class="text-muted">Phone</small>
-                                    <p class="mb-0" id="displayPhone">-</p>
-                                </div>
-                                <div class="col-md-5">
-                                    <small class="text-muted">Address</small>
-                                    <p class="mb-0" id="displayAddress">-</p>
-                                </div>
-                            </div>
 
-                        </div>
-                    </div>
-                </div>
-
+        <div class="card shadow mt-3" id="jobInfoCard" style="display: none;">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i> Job Information & Quotation</h6>
             </div>
-            <div class="col-md-6">
-                <div class="card shadow mt-2" id="quotationFormCard" style="display: none;">
-                    <div class="card-body">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary mb-2"><i class="fas fa-briefcase me-2"></i> Job Details</h6>
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Quotation Date <span
-                                            class="text-danger">*</span></label>
-                                    <input type="date" name="quotation_date" id="quotation_date" class="form-control"
-                                        value="{{ date('Y-m-d') }}">
+                                <div class="info-card">
+                                    <div class="info-label">Job ID</div>
+                                    <div class="info-value fw-bold" id="displayJobId">-</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Quotation Status</label>
-                                    <select name="quotation_status" id="quotation_status" class="form-control">
+                                <div class="info-card">
+                                    <div class="info-label">Job Date</div>
+                                    <div class="info-value" id="displayJobDate">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <div class="info-label">Job Status</div>
+                                    <div class="info-value" id="displayJobStatus">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <div class="info-label">Engine</div>
+                                    <div class="info-value" id="displayEngine">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <div class="info-label">Vehicle Registration</div>
+                                    <div class="info-value" id="displayVehicleReg">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <div class="info-label">Customer</div>
+                                    <div class="info-value" id="displayCustomer">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <div class="info-label">Phone</div>
+                                    <div class="info-value" id="displayPhone">-</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <div class="info-label">Address</div>
+                                    <div class="info-value" id="displayAddress">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary mb-2"><i class="fas fa-file-signature me-2"></i> Quotation Details</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-2"><label class="form-label fw-bold">Quotation Date <span
+                                            class="text-danger">*</span></label><input type="date" name="quotation_date"
+                                        id="quotation_date" class="form-control" value="{{ date('Y-m-d') }}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-2"><label class="form-label fw-bold">Quotation Status</label><select
+                                        name="quotation_status" id="quotation_status" class="form-control">
                                         <option value="not_send">Not Send</option>
                                         <option value="send">Send</option>
                                         <option value="pending">Pending</option>
-                                    </select>
-                                </div>
+                                    </select></div>
                             </div>
                             <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">Quotation Description</label>
-                                    <textarea name="quotation_description" id="quotation_description"
-                                        class="form-control" rows="2"
-                                        placeholder="Enter quotation description..."></textarea>
-                                </div>
+                                <div class="mb-2"><label class="form-label fw-bold">Quotation Subject</label><input
+                                        type="text" name="quotation_subject" id="quotation_subject" class="form-control"
+                                        placeholder="Enter quotation subject..."></div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="mb-2"><label class="form-label fw-bold">Quotation
+                                        Description</label><textarea name="quotation_description"
+                                        id="quotation_description" class="form-control" rows="2"
+                                        placeholder="Enter quotation description..."></textarea></div>
                             </div>
                         </div>
                     </div>
@@ -226,144 +212,163 @@
             </div>
         </div>
 
-        <!-- Quotation Form -->
-
-
-        <!-- Services Selection Section -->
-        <div class="card shadow mt-4" id="servicesCard" style="display: none;">
-            <div class="card-header bg-primary text-white">
-                <h6 class="mb-0"><i class="fas fa-tools me-2"></i> Services Selection</h6>
-            </div>
-            <div class="card-body">
-                <!-- Add Service Row -->
-                <div class="row mb-3 align-items-end">
-                    <div class="col-md-5">
-                        <label class="form-label fw-bold">Select Service <span class="text-danger">*</span></label>
-                        <div class="d-flex gap-2">
-                            <select id="service_id" class="form-control" style="width: 100%;">
-                                <option value=""></option>
-                                @foreach($services as $service)
-                                <option value="{{ $service->id }}" data-name="{{ $service->name }}"
-                                    data-price="{{ $service->price }}">
-                                    {{ $service->name }} - ({{ number_format($service->price, 2) }})
-                                </option>
-                                @endforeach
-                            </select>
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                data-bs-target="#serviceModal" style="white-space: nowrap;">
-                                <i class="fas fa-plus-circle me-1"></i> New
-                            </button>
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <div class="card shadow" id="jobDescriptionsCard" style="display: none;">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-tasks me-2"></i> Job Descriptions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="jobDescriptionsList">
+                            <p class="text-muted text-center">Select a job to view descriptions</p>
                         </div>
                     </div>
-                    <div class="col-md-2">
-                        <label class="form-label fw-bold">Unit <span class="text-danger">*</span></label>
-                        <select id="service_unit" class="form-control">
-                            <option value="">Select Unit</option>
-                            @foreach($units as $unit)
-                            <option
-                                @if ($unit->is_default == 1)
-                                    selected
-                                @endif
-                                value="{{ $unit->id }}" data-name="{{ $unit->name }}">
-                                {{ $unit->name }}
-                            </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label fw-bold">Quantity <span class="text-danger">*</span></label>
-                        <input type="number" id="service_quantity" class="form-control" value="1" min="1">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label fw-bold">&nbsp;</label>
-                        <button type="button" id="addServiceBtn" class="btn btn-success w-100">
-                            <i class="fas fa-plus me-2"></i> Add Service
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Services Table with form-control-sm -->
-                <div class="table-responsive mt-3">
-                    <table class="table table-sm table-bordered" id="servicesTable">
-                        <thead class="table-head">
-                            <tr>
-                                <th width="5%">#</th>
-                                <th width="35%">Service Details</th>
-                                <th width="10%">Unit</th>
-                                <th width="12%">Unit Price</th>
-                                <th width="8%">Qty</th>
-                                <th width="12%">Total</th>
-                                <th width="8%">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="servicesTableBody">
-                            <tr>
-                                <td colspan="7" class="text-center text-muted">No services added</td>
-                            </tr>
-                        </tbody>
-                        <tfoot class="table-calculations">
-                            <tr>
-                                <td colspan="4" class="text-end fw-bold">Total:</td>
-                                <td class="fw-bold text-center" id="totalQuantity">0</td>
-                                <td class="fw-bold" style="text-align: right" id="totalPrice">0.00</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
                 </div>
             </div>
-            <div class="mt-4 mb-4 text-center">
-                <button type="button" class="btn btn-lg btn-secondary px-4" id="resetBtn">
-                    <i class="fas fa-undo me-2"></i> Reset
-                </button>
-                <button onclick="return confirm('Are you sure you want to save this quotation?')" type="button"
-                    id="saveQuotationBtn" class="btn btn-lg btn-success px-4">
-                    <i class="fas fa-save me-2"></i> Save Quotation
-                </button>
+            <div class="col-md-9">
+                <div class="card shadow" id="servicesCard" style="display: none;">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="fas fa-tools me-2"></i> Services Selection</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-end gap-2 mb-2">
+                            <button type="button" id="printQuotationBtn" class="btn btn-sm btn-info"
+                                style="display: none;"><i class="fas fa-print me-1"></i> Print</button>
+                            <button type="button" id="convertToInvoiceBtn" class="btn btn-sm btn-success"
+                                style="display: none;"><i class="fas fa-exchange-alt me-1"></i> Convert to
+                                Invoice</button>
+                        </div>
+
+                        <div class="row mb-2 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Select Service <span
+                                        class="text-danger">*</span></label>
+                                <div class="d-flex gap-2">
+                                    <select id="service_id" class="form-control" style="width: 100%;">
+                                        <option value=""></option>
+                                        @foreach($services as $service)
+                                        <option value="{{ $service->id }}" data-name="{{ $service->name }}"
+                                            data-price="{{ $service->price }}">{{ $service->name }} - ({{
+                                            number_format($service->price, 2) }})</option>
+                                        @endforeach
+                                    </select>
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                        data-bs-target="#serviceModal" style="white-space: nowrap;"><i
+                                            class="fas fa-plus-circle me-1"></i> New</button>
+                                </div>
+                            </div>
+                            <div class="col-md-2"><label class="form-label fw-bold">Unit <span
+                                        class="text-danger">*</span></label><select id="service_unit"
+                                    class="form-control">
+                                    <option value="">Select Unit</option>@foreach($units as $unit)<option @if ($unit->
+                                        is_default == 1) selected @endif value="{{ $unit->id }}" data-name="{{
+                                        $unit->name }}">{{ $unit->name }}</option>@endforeach
+                                </select></div>
+                            <div class="col-md-2"><label class="form-label fw-bold">Quantity <span
+                                        class="text-danger">*</span></label><input type="number" id="service_quantity"
+                                    class="form-control" value="1" min="1"></div>
+                            <div class="col-md-2"><label class="form-label fw-bold">&nbsp;</label><button type="button"
+                                    id="addServiceBtn" class="btn btn-success w-100"><i class="fas fa-plus me-2"></i>
+                                    Add</button></div>
+                        </div>
+
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm table-bordered" id="servicesTable">
+                                <thead>
+                                    <tr>
+                                        <th width="5%">#</th>
+                                        <th width="35%">Service Details</th>
+                                        <th width="10%">Unit</th>
+                                        <th width="12%">Unit Price</th>
+                                        <th width="8%">Qty</th>
+                                        <th width="12%">Total</th>
+                                        <th width="8%">Action</th>
+                                        </td>
+                                </thead>
+                                <tbody id="servicesTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted">No services added</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot class="table-calculations">
+                                    <tr>
+                                        <td colspan="4" class="text-end fw-bold">Subtotal:</td>
+                                        <td class="fw-bold text-center" id="totalQuantity">0</td>
+                                        <td class="fw-bold text-end" id="totalPrice">0.00</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr id="vatRow" style="display: none;">
+                                        <td colspan="5" class="text-end fw-bold">VAT (<span
+                                                id="vatPercentage">0</span>%):</td>
+                                        <td class="fw-bold text-end" id="vatAmount">0.00</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td colspan="5" class="text-end fw-bold">Grand Total:</td>
+                                        <td class="fw-bold text-end" id="grandTotal">0.00</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <div class="row mt-2">
+                            <div class="col-md-3 offset-md-9">
+                                <div class="mb-2"><label class="form-label fw-bold">VAT Type</label><select
+                                        name="quotation_vat_type" id="quotation_vat_type" class="form-control">
+                                        <option value="include">Include VAT</option>
+                                        <option value="exclude">Exclude VAT</option>
+                                    </select></div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-3 offset-md-9">
+                                <div class="mb-2"><label class="form-label fw-bold">VAT (%)</label><input type="number"
+                                        name="quotation_vat" id="quotation_vat" class="form-control" step="0.01"
+                                        value="0" placeholder="Enter VAT percentage"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 mb-4 text-center">
+                        <button type="button" class="btn btn-lg btn-secondary px-4" id="resetBtn"><i
+                                class="fas fa-undo me-2"></i> Reset</button>
+                        <button type="button" id="saveQuotationBtn" class="btn btn-lg btn-success px-4"><i
+                                class="fas fa-save me-2"></i> Save Quotation</button>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
 </div>
 
 <!-- Service Modal -->
-<div class="modal fade" id="serviceModal" tabindex="-1" aria-labelledby="serviceModalLabel" aria-hidden="true">
+<div class="modal fade" id="serviceModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title text-white" id="serviceModalLabel">
-                    <i class="fas fa-tools"></i> Add New Service
-                </h5>
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="fa fa-1x fa-times"></i>
-                </button>
+                <h5 class="modal-title text-white"><i class="fas fa-tools"></i> Add New Service</h5><button
+                    type="button" class="btn btn-danger" data-bs-dismiss="modal"><i
+                        class="fa fa-1x fa-times"></i></button>
             </div>
             <form id="serviceForm">
                 @csrf
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="service_name" class="form-label">Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="service_name" name="name" required>
+                    <div class="mb-2"><label for="service_name">Name <span class="text-danger">*</span></label><input
+                            type="text" class="form-control" id="service_name" name="name" required></div>
+                    <div class="mb-2"><label for="service_price">Price <span class="text-danger">*</span></label><input
+                            type="number" step="0.01" class="form-control" id="service_price" name="price" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="service_price" class="form-label">Price <span class="text-danger">*</span></label>
-                        <input type="number" step="0.01" class="form-control" id="service_price" name="price" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="service_description" class="form-label">Description</label>
-                        <textarea class="form-control" id="service_description" name="description" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="service_status" class="form-label">Status</label>
-                        <select class="form-control" id="service_status" name="status">
+                    <div class="mb-2"><label for="service_description">Description</label><textarea class="form-control"
+                            id="service_description" name="description" rows="3"></textarea></div>
+                    <div class="mb-2"><label for="service_status">Status</label><select class="form-control"
+                            id="service_status" name="status">
                             <option value="1">Active</option>
                             <option value="0">Inactive</option>
-                        </select>
-                    </div>
+                        </select></div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="saveServiceBtn">Save Service</button>
-                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary"
+                        id="saveServiceBtn">Save Service</button></div>
             </form>
         </div>
     </div>
@@ -373,18 +378,16 @@
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     $(document).ready(function() {
-    // Activate sidebar
     $('#quotations-index-sidebar, #jobs-sidebar').addClass('active');
     $('#collapseJobs').addClass('show');
 
     let selectedJobId = null;
     let servicesList = [];
     let rowCounter = 0;
-    let hasQuotation = false;
 
-    // Get job_id from URL parameter
     function getUrlParameter(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -394,212 +397,135 @@
 
     var urlJobId = getUrlParameter('job_id');
 
-    // Initialize Select2 for Job Search
     $('#job_id').select2({
-        theme: 'bootstrap-5',
-        placeholder: 'Search by Job ID or Customer Name...',
-        allowClear: true,
-        width: '100%',
+        theme: 'bootstrap-5', placeholder: 'Search by Job ID or Customer Name...', allowClear: true, width: '100%',
         ajax: {
-            url: "{{ url('admin/jobs/search') }}",
-            type: 'GET',
-            dataType: 'json',
-            delay: 250,
-            data: function(params) {
-                return {
-                    search: params.term,
-                    page: params.page || 1
-                };
-            },
+            url: "{{ url('admin/jobs/search') }}", type: 'GET', dataType: 'json', delay: 250,
+            data: function(params) { return { search: params.term, page: params.page || 1 }; },
             processResults: function(data, params) {
                 params.page = params.page || 1;
-                return {
-                    results: data.results,
-                    pagination: {
-                        more: data.pagination.more
-                    }
-                };
+                return { results: data.results, pagination: { more: data.pagination.more } };
             },
             cache: true
         },
         minimumInputLength: 1,
-        templateResult: formatJob,
-        templateSelection: formatJobSelection
+        templateResult: function(job) { return job.loading ? job.text : (job.job_id ? $('<div><strong>' + job.job_id + '</strong><br><small>' + (job.customer_name || '') + ' | ' + (job.job_date || '') + '</small></div>') : job.text); },
+        templateSelection: function(job) { return job.job_id ? job.job_id + ' - ' + (job.customer_name || '') : job.text; }
     });
 
-    // Auto focus on Select2 search
-    $('#job_id').on('select2:open', function(e) {
-        setTimeout(function() {
-            var $searchField = $('.select2-container--open .select2-search__field');
-            if ($searchField.length) {
-                $searchField[0].focus();
-            }
-        }, 100);
-    });
+    $('#service_id').select2({ theme: 'bootstrap-5', placeholder: 'Search and select service', allowClear: true, width: '100%' });
 
-    function formatJob(job) {
-        if (job.loading) return job.text;
-        if (!job.job_id) return job.text;
-        return $('<div><strong>' + job.job_id + '</strong><br><small>' + (job.customer_name || '') + ' | ' + (job.job_date || '') + '</small></div>');
-    }
-
-    function formatJobSelection(job) {
-        if (!job.job_id) return job.text;
-        return job.job_id + ' - ' + (job.customer_name || '');
-    }
-
-    // Initialize Select2 for Service
-    $('#service_id').select2({
-        theme: 'bootstrap-5',
-        placeholder: 'Search and select service',
-        allowClear: true,
-        width: '100%',
-    });
-
-    // Auto-load job if ID is provided in URL
     if (urlJobId && urlJobId !== '') {
-        var tempOption = new Option('Loading...', urlJobId, true, true);
-        $('#job_id').append(tempOption).trigger('change');
-
         $.ajax({
             url: "{{ url('admin/jobs/get-details') }}/" + urlJobId,
             type: 'GET',
-            dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    var jobOption = new Option(
-                        response.job.job_id + ' - ' + response.job.customer_name,
-                        response.job.id,
-                        true,
-                        true
-                    );
+                    var jobOption = new Option(response.job.job_id + ' - ' + response.job.customer_name, response.job.id, true, true);
                     $('#job_id').empty().append(jobOption).trigger('change');
                     selectedJobId = response.job.id;
                     loadJobDetails(selectedJobId);
-                } else {
-                    $('#job_id').empty().append(new Option('Job not found', '', true, true));
-                    Swal.fire('Error', 'Job not found!', 'error');
                 }
-            },
-            error: function() {
-                $('#job_id').empty().append(new Option('Job not found', '', true, true));
-                Swal.fire('Error', 'Failed to load job details', 'error');
             }
         });
     }
 
-    // Handle Job Selection
     $('#job_id').on('change', function() {
         selectedJobId = $(this).val();
-        if (selectedJobId) {
-            loadJobDetails(selectedJobId);
-        } else {
-            $('#jobInfo').hide();
-            $('#quotationFormCard').hide();
-            $('#servicesCard').hide();
-            $('#printBtnContainer').hide();
-            hasQuotation = false;
-        }
+        if (selectedJobId) loadJobDetails(selectedJobId);
+        else { $('#jobInfoCard, #jobDescriptionsCard, #servicesCard').hide(); }
     });
 
+    function getStatusBadge(status) {
+        const badges = { 'pending': 'badge bg-warning', 'in_progress': 'badge bg-info', 'completed': 'badge bg-success', 'cancelled': 'badge bg-danger', 'not_started': 'badge bg-secondary' };
+        const statusKey = (status || 'pending').toLowerCase();
+        const badgeClass = badges[statusKey] || 'badge bg-secondary';
+        let statusText = statusKey.replace('_', ' ').replace('-', ' ').toUpperCase();
+        return '<span class="' + badgeClass + '">' + statusText + '</span>';
+    }
 
-function getStatusBadge(status) {
-    console.log(status);
-    const badges = {
-        'pending': 'badge bg-warning',
-        'in_progress': 'badge bg-info',
-        'completed': 'badge bg-success',
-        'cancelled': 'badge bg-danger',
-        'not_started': 'badge bg-secondary'
-    };
-
-    // Convert status to lowercase for comparison
-    const statusKey = (status || 'pending').toLowerCase();
-    const badgeClass = badges[statusKey] || 'badge bg-secondary';
-
-    // Format status text for display
-    let statusText = statusKey.replace('_', ' ').replace('-', ' ');
-    statusText = statusText.toUpperCase();
-
-    return '<span class="' + badgeClass + '">' + statusText + '</span>';
-}
-
-    // Load Job Details and Existing Quotation
-    // Load Job Details and Existing Quotation
-function loadJobDetails(jobId) {
-    $.ajax({
-        url: "{{ url('admin/jobs/get-details') }}/" + jobId,
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-
-                $('#displayJobId').text(response.job.job_id);
-                $('#displayJobStatus').html(getStatusBadge(response.job.job_status));
-                $('#displayJobDate').text(response.job.job_date);
-                $('#displayEngine').text(response.job.engine || 'N/A');
-                $('#displayDescription').text(response.job.descriptions || 'N/A');
-                $('#displayCustomer').text(response.job.customer_name || 'N/A');
-                $('#displayPhone').text(response.job.customer_phone || 'N/A');
-                $('#displayAddress').text(response.job.customer_address || 'N/A');
-                $('#jobInfo').show();
-                $('#quotationFormCard').show();
-                $('#servicesCard').show();
-
-                if (response.job.quotation_date || response.job.quotation_description || (response.services && response.services.length > 0)) {
-                    hasQuotation = true;
-                    $('#printBtnContainer').show();
+    function loadJobDescriptions(jobId) {
+        $.ajax({
+            url: "{{ url('admin/job-books/get-descriptions') }}/" + jobId,
+            type: 'GET',
+            success: function(response) {
+                if (response.success && response.descriptions && response.descriptions.length > 0) {
+                    var html = '';
+                    $.each(response.descriptions, function(index, desc) {
+                        html += '<div class="description-item"><strong>' + (index + 1) + '.</strong> ' + escapeHtml(desc.description || '') + '</div>';
+                    });
+                    $('#jobDescriptionsList').html(html);
                 } else {
-                    hasQuotation = false;
-                    $('#printBtnContainer').hide();
-                }
-
-                if (response.job.quotation_date || response.job.quotation_description) {
-                    $('#quotation_date').val(response.job.quotation_date || '{{ date("Y-m-d") }}');
-                    $('#quotation_description').val(response.job.quotation_description || '');
-                    $('#quotation_status').val(response.job.quotation_status || 'not_send');
-
-                    if (response.services && response.services.length > 0) {
-                        servicesList = [];
-                        rowCounter = 0;
-                        response.services.forEach(function(service, index) {
-                            servicesList.push({
-                                temp_id: rowCounter++,
-                                service_id: service.service_id,
-                                service_name: service.service_name,
-                                unit_id: service.unit_id || null,
-                                unit_name: service.unit_name || '',
-                                price: parseFloat(service.price),
-                                quantity: service.quantity,
-                                total: parseFloat(service.total_price),
-                                db_id: service.id
-                            });
-                        });
-                        renderServicesTable();
-                        calculateTotals();
-                    } else {
-                        servicesList = [];
-                        renderServicesTable();
-                        calculateTotals();
-                    }
-                } else {
-                    $('#quotation_date').val('{{ date("Y-m-d") }}');
-                    $('#quotation_description').val('');
-                    servicesList = [];
-                    renderServicesTable();
-                    calculateTotals();
-                    $('#printBtnContainer').hide();
+                    $('#jobDescriptionsList').html('<p class="text-muted text-center">No job descriptions available</p>');
                 }
             }
-        },
-        error: function(xhr) {
-            console.error('Error loading job:', xhr);
-            Swal.fire('Error', 'Failed to load job details', 'error');
-        }
-    });
-}
+        });
+    }
 
-    // Add Service to Table
+    function loadJobDetails(jobId) {
+        $.ajax({
+            url: "{{ url('admin/jobs/get-details') }}/" + jobId,
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    $('#displayJobId').text(response.job.job_id);
+                    $('#displayJobStatus').html(getStatusBadge(response.job.job_status));
+                    $('#displayJobDate').text(response.job.job_date);
+                    $('#displayEngine').text(response.job.engine || 'N/A');
+                    $('#displayVehicleReg').text(response.job.vehicle_registration_no || 'N/A');
+                    $('#displayCustomer').text(response.job.customer_name || 'N/A');
+                    $('#displayPhone').text(response.job.customer_phone || 'N/A');
+                    $('#displayAddress').text(response.job.customer_address || 'N/A');
+                    loadJobDescriptions(jobId);
+                    $('#jobInfoCard, #jobDescriptionsCard, #servicesCard').show();
+
+                    if (response.job.invoice_date) $('#convertToInvoiceBtn').prop('disabled', true);
+                    else $('#convertToInvoiceBtn').prop('disabled', false);
+
+                    if (response.job.quotation_date && !response.job.invoice_date && response.services && response.services.length > 0) $('#convertToInvoiceBtn').show();
+                    else $('#convertToInvoiceBtn').hide();
+
+                    if (response.job.quotation_date && response.services && response.services.length > 0) $('#printQuotationBtn').show();
+                    else $('#printQuotationBtn').hide();
+
+                    if (response.job.quotation_date || response.job.quotation_description || (response.services && response.services.length > 0)) {
+                        $('#quotation_date').val(response.job.quotation_date || '{{ date("Y-m-d") }}');
+                        $('#quotation_subject').val(response.job.quotation_subject || '');
+                        $('#quotation_description').val(response.job.quotation_description || '');
+                        $('#quotation_status').val(response.job.quotation_status || 'not_send');
+                        $('#quotation_vat').val(response.job.quotation_vat || 0);
+                        $('#quotation_vat_type').val(response.job.quotation_vat_type || 'include');
+
+                        if (response.job.quotation_vat_type === 'include') $('#vatPercentRow').hide();
+                        else $('#vatPercentRow').show();
+
+                        if (response.services && response.services.length > 0) {
+                            servicesList = []; rowCounter = 0;
+                            response.services.forEach(function(service) {
+                                servicesList.push({ temp_id: rowCounter++, service_id: service.service_id, service_name: service.service_name, unit_id: service.unit_id || null, unit_name: service.unit_name || '', price: parseFloat(service.price), quantity: service.quantity, total: parseFloat(service.total_price), db_id: service.id });
+                            });
+                            renderServicesTable();
+                            calculateTotals();
+                        } else {
+                            servicesList = [];
+                            renderServicesTable();
+                            calculateTotals();
+                        }
+                    } else {
+                        $('#quotation_date').val('{{ date("Y-m-d") }}');
+                        $('#quotation_subject, #quotation_description').val('');
+                        $('#quotation_status').val('not_send');
+                        $('#quotation_vat, #quotation_vat_type').val(0);
+                        servicesList = [];
+                        renderServicesTable();
+                        calculateTotals();
+                        $('#convertToInvoiceBtn, #printQuotationBtn').hide();
+                    }
+                }
+            }
+        });
+    }
+
     $('#addServiceBtn').click(function() {
         var serviceId = $('#service_id').val();
         var serviceName = $('#service_id option:selected').data('name');
@@ -608,113 +534,48 @@ function loadJobDetails(jobId) {
         var unitName = $('#service_unit option:selected').data('name');
         var quantity = parseInt($('#service_quantity').val());
 
-        if (!serviceId) {
-            Swal.fire('Error', 'Please select a service', 'error');
-            return;
-        }
-        if (!unitId) {
-            Swal.fire('Error', 'Please select a unit', 'error');
-            return;
-        }
-        if (!quantity || quantity < 1) {
-            Swal.fire('Error', 'Please enter valid quantity', 'error');
-            return;
-        }
+        if (!serviceId || !unitId || !quantity || quantity < 1) { Swal.fire('Error', 'Please fill all fields', 'error'); return; }
+        if (servicesList.findIndex(s => s.service_id == serviceId) !== -1) { Swal.fire('Warning', 'This service already exists!', 'warning'); return; }
 
-        // Check if service already exists
-        var existingIndex = servicesList.findIndex(s => s.service_id == serviceId);
-        if (existingIndex !== -1) {
-            Swal.fire('Warning', 'This service already exists!', 'warning');
-            return;
-        }
-
-        var totalPrice = servicePrice * quantity;
-
-        var serviceData = {
-            temp_id: rowCounter++,
-            service_id: serviceId,
-            service_name: serviceName,
-            unit_id: unitId,
-            unit_name: unitName,
-            price: servicePrice,
-            quantity: quantity,
-            total: totalPrice
-        };
-
-        servicesList.push(serviceData);
+        servicesList.push({ temp_id: rowCounter++, service_id: serviceId, service_name: serviceName, unit_id: unitId, unit_name: unitName, price: servicePrice, quantity: quantity, total: servicePrice * quantity });
         renderServicesTable();
         calculateTotals();
-
-        // Reset selection
         $('#service_id').val('').trigger('change');
         $('#service_quantity').val(1);
     });
 
-    // Render Services Table with Unit column
     function renderServicesTable() {
         var tbody = $('#servicesTableBody');
         tbody.empty();
-
-        if (servicesList.length === 0) {
-            tbody.append('<tr><td colspan="7" class="text-center text-muted">No services added</td></tr>');
-            return;
-        }
-
+        if (servicesList.length === 0) { tbody.append('<td><td colspan="7" class="text-center text-muted">No services added</td></tr>'); return; }
         $.each(servicesList, function(index, service) {
-
-            var row = `
-                <tr class="service-row">
-                    <td>${index + 1}</td>
-                    <td>
-                        <strong>${service.service_name}</strong>
-                        <input type="hidden" name="services[${index}][id]" value="${service.db_id || ''}">
-                        <input type="hidden" name="services[${index}][service_id]" value="${service.service_id}">
-                    </td>
-                    <td>
-                        ${service.unit_name}
-                        <input type="hidden" name="services[${index}][unit_id]" value="${service.unit_id}">
-                    </td>
-                    <td>
-                        <input type="number" step="0.01" class="form-control form-control-sm price-input" data-index="${index}" value="${service.price.toFixed(2)}" style="width: 100px;">
-                    </td>
-                    <td>
-                        <input type="number" class="form-control text-center form-control-sm qty-input" data-index="${index}" value="${service.quantity}" min="1" style="width: 70px;">
-                    </td>
-                    <td class="total-price-${index}" style="text-align:right">${service.total.toFixed(2)}</td>
-                    <td class="text-center">
-                        <i class="fas fa-trash-alt remove-service text-danger" data-index="${index}" style="cursor: pointer;"></i>
-                    </td>
-                </tr>
-            `;
+            var row = '<tr class="service-row"><td class="text-center">' + (index + 1) + '</td><td><strong>' + service.service_name + '</strong><input type="hidden" name="services[' + index + '][id]" value="' + (service.db_id || '') + '"><input type="hidden" name="services[' + index + '][service_id]" value="' + service.service_id + '"></td><td class="text-center">' + service.unit_name + '<input type="hidden" name="services[' + index + '][unit_id]" value="' + service.unit_id + '"></td><td class="text-end"><input type="number" step="0.01" class="form-control form-control-sm price-input" data-index="' + index + '" value="' + service.price.toFixed(2) + '" style="width: 100px;"></td><td class="text-center"><input type="number" class="form-control text-center form-control-sm qty-input" data-index="' + index + '" value="' + service.quantity + '" min="1" style="width: 70px;"></td><td class="total-price-' + index + ' text-end">' + service.total.toFixed(2) + '</td><td class="text-center"><i class="fas fa-trash-alt remove-service text-danger" data-index="' + index + '" style="cursor: pointer;"></i></td></tr>';
             tbody.append(row);
         });
     }
 
-    // Handle Price Change
     $(document).on('change input', '.price-input', function() {
         var index = $(this).data('index');
         var newPrice = parseFloat($(this).val());
         if (!isNaN(newPrice) && newPrice >= 0) {
             servicesList[index].price = newPrice;
             servicesList[index].total = servicesList[index].price * servicesList[index].quantity;
-            $(`.total-price-${index}`).text(servicesList[index].total.toFixed(2));
+            $('.total-price-' + index).text(servicesList[index].total.toFixed(2));
             calculateTotals();
         }
     });
 
-    // Handle Quantity Change
     $(document).on('change input', '.qty-input', function() {
         var index = $(this).data('index');
         var newQty = parseInt($(this).val());
         if (!isNaN(newQty) && newQty >= 1) {
             servicesList[index].quantity = newQty;
             servicesList[index].total = servicesList[index].price * servicesList[index].quantity;
-            $(`.total-price-${index}`).text(servicesList[index].total.toFixed(2));
+            $('.total-price-' + index).text(servicesList[index].total.toFixed(2));
             calculateTotals();
         }
     });
 
-    // Remove Service
     $(document).on('click', '.remove-service', function() {
         var index = $(this).data('index');
         servicesList.splice(index, 1);
@@ -722,142 +583,156 @@ function loadJobDetails(jobId) {
         calculateTotals();
     });
 
-    // Calculate Totals
     function calculateTotals() {
-        var totalQty = 0;
         var totalPrice = 0;
+        $.each(servicesList, function(index, service) { totalPrice += service.total; });
 
-        $.each(servicesList, function(index, service) {
-            totalQty += service.quantity;
-            totalPrice += service.total;
-        });
+        var vatPercent = parseFloat($('#quotation_vat').val()) || 0;
+        var vatType = $('#quotation_vat_type').val();
+        var vatAmount = 0;
+        var grandTotal = totalPrice;
 
-        $('#totalQuantity').text(totalQty);
+        if (vatType === 'exclude' && vatPercent > 0) {
+            vatAmount = (totalPrice * vatPercent) / 100;
+            grandTotal = totalPrice + vatAmount;
+            $('#vatRow').show();
+            $('#vatPercentage').text(vatPercent);
+            $('#vatAmount').text(vatAmount.toFixed(2));
+        } else {
+            $('#vatRow').hide();
+        }
+
         $('#totalPrice').text(totalPrice.toFixed(2));
+        $('#grandTotal').text(grandTotal.toFixed(2));
+        $('#quotation_vat_amount').val(vatAmount);
     }
 
-    // Reset Form
+    $(document).on('change', '#quotation_vat_type', function() {
+        if ($(this).val() === 'include') {
+            $('#vatPercentRow').hide();  // ← This hides the VAT percentage input
+            $('#quotation_vat').val(0);   // ← Set VAT to 0
+        } else {
+            $('#vatPercentRow').show();   // ← Shows when exclude
+        }
+        calculateTotals();
+    });
+
+    if ($('#quotation_vat_type').val() === 'include') {
+        $('#vatPercentRow').hide();  // ← Hide on page load if include
+    } else {
+        $('#vatPercentRow').show();   // ← Show if exclude
+    }
+    calculateTotals();
+
+    $(document).on('input', '#quotation_vat', function() { calculateTotals(); });
+
     $('#resetBtn').click(function() {
-        Swal.fire({
-            title: 'Reset Form?',
-            text: 'All unsaved data will be lost!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, reset it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $('#job_id').val('').trigger('change');
-                $('#quotation_date').val('{{ date("Y-m-d") }}');
-                $('#quotation_description').val('');
-                servicesList = [];
-                renderServicesTable();
-                calculateTotals();
-                $('#jobInfo').hide();
-                $('#quotationFormCard').hide();
-                $('#servicesCard').hide();
-                $('#printBtnContainer').hide();
-                hasQuotation = false;
-                Swal.fire('Reset!', 'Form has been reset.', 'success');
-            }
+        Swal.fire({ title: 'Reset Form?', text: 'All unsaved data will be lost!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Yes, reset it!' }).then((result) => {
+            if (result.isConfirmed) { $('#job_id').val('').trigger('change'); servicesList = []; renderServicesTable(); calculateTotals(); Swal.fire('Reset!', 'Form has been reset.', 'success'); }
         });
     });
 
-    // Save Quotation
     $('#saveQuotationBtn').click(function() {
-        if (!selectedJobId) {
-            Swal.fire('Error', 'Please select a job first', 'error');
-            return;
-        }
+        if (!selectedJobId) { Swal.fire('Error', 'Please select a job first', 'error'); return; }
+        if (servicesList.length === 0) { Swal.fire('Error', 'Please add at least one service', 'error'); return; }
 
-        if (servicesList.length === 0) {
-            Swal.fire('Error', 'Please add at least one service', 'error');
-            return;
-        }
+        var totalPrice = 0;
+        $.each(servicesList, function(index, service) { totalPrice += service.total; });
+        var vatPercent = parseFloat($('#quotation_vat').val()) || 0;
+        var vatType = $('#quotation_vat_type').val();
+        var vatAmount = 0;
+        var grandTotal = totalPrice;
+        if (vatType === 'exclude' && vatPercent > 0) { vatAmount = (totalPrice * vatPercent) / 100; grandTotal = totalPrice + vatAmount; }
 
         var formData = {
-            job_id: selectedJobId,
-            quotation_date: $('#quotation_date').val(),
-            quotation_description: $('#quotation_description').val(),
-            quotation_status: $('#quotation_status').val(),
-            services: servicesList,
-            _token: '{{ csrf_token() }}'
+            job_id: selectedJobId, quotation_date: $('#quotation_date').val(), quotation_subject: $('#quotation_subject').val(),
+            quotation_description: $('#quotation_description').val(), quotation_status: $('#quotation_status').val(),
+            quotation_vat: vatPercent, quotation_vat_type: vatType, quotation_vat_amount: vatAmount,
+            quotation_amount: grandTotal, services: servicesList, _token: '{{ csrf_token() }}'
         };
 
         var saveBtn = $('#saveQuotationBtn');
         saveBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
-
         $.ajax({
-            url: "{{ url('admin/job-quotations/store') }}",
-            type: 'POST',
-            data: formData,
-            dataType: 'json',
+            url: "{{ url('admin/job-quotations/store') }}", type: 'POST', data: formData, dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: response.message,
-                        timer: 2000,
-                        showConfirmButton: false
+                    Swal.fire({ icon: 'success', title: 'Success!', text: response.message, timer: 2000, showConfirmButton: false }).then(function() {
+                        window.location.href = "{{ url('admin/job-quotations/create') }}?job_id=" + selectedJobId;
                     });
-                }
+                } else { Swal.fire('Error!', response.message || 'Failed to save', 'error'); saveBtn.prop('disabled', false).html('<i class="fas fa-save me-2"></i> Save Quotation'); }
             },
-            error: function(xhr) {
-                var errorMsg = 'Failed to save quotation';
-                if (xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMsg = xhr.responseJSON.message;
-                }
-                Swal.fire('Error!', errorMsg, 'error');
-            },
-            complete: function() {
-                saveBtn.prop('disabled', false).html('<i class="fas fa-save me-2"></i> Save Quotation');
-            }
+            error: function() { Swal.fire('Error!', 'Failed to save quotation', 'error'); saveBtn.prop('disabled', false).html('<i class="fas fa-save me-2"></i> Save Quotation'); }
         });
     });
 
-    // Save Service Modal
     $('#serviceForm').submit(function(e) {
         e.preventDefault();
-
-        var serviceData = {
-            name: $('#service_name').val(),
-            price: $('#service_price').val(),
-            description: $('#service_description').val(),
-            status: $('#service_status').val(),
-            _token: '{{ csrf_token() }}'
-        };
-
-        var saveBtn = $('#saveServiceBtn');
-        saveBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
-
         $.ajax({
-            url: "{{ route('admin.services.store') }}",
-            type: 'POST',
-            data: serviceData,
-            dataType: 'json',
+            url: "{{ route('admin.services.store') }}", type: 'POST',
+            data: { name: $('#service_name').val(), price: $('#service_price').val(), description: $('#service_description').val(), status: $('#service_status').val(), _token: '{{ csrf_token() }}' },
             success: function(response) {
                 if (response.success && response.service) {
-                    var newOption = new Option(response.service.name + ' - $' + response.service.price, response.service.id, false, false);
+                    var newOption = new Option(response.service.name + ' - ' + response.service.price, response.service.id, false, false);
                     newOption.setAttribute('data-name', response.service.name);
                     newOption.setAttribute('data-price', response.service.price);
                     $('#service_id').append(newOption);
-
                     $('#serviceModal').modal('hide');
                     $('#serviceForm')[0].reset();
-
                     Swal.fire('Success!', 'Service added successfully', 'success');
                 }
-            },
-            error: function(xhr) {
-                Swal.fire('Error!', 'Failed to add service', 'error');
-            },
-            complete: function() {
-                saveBtn.prop('disabled', false).html('Save Service');
             }
         });
     });
+
+    $(document).on('click', '#convertToInvoiceBtn', function() {
+    if (!selectedJobId || servicesList.length === 0) return;
+
+    Swal.fire({
+        title: 'Convert to Invoice?',
+        text: 'This will create an invoice from the current quotation.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, convert it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: "{{ url('admin/job-quotations/convert-to-invoice') }}",
+                type: 'POST',
+                data: {
+                    job_id: selectedJobId,
+                    services: servicesList,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            window.location.href = "{{ url('admin/job-invoices/create') }}?job_id=" + selectedJobId;
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire('Error!', xhr.responseJSON?.message || 'Failed to convert', 'error');
+                }
+            });
+        }
+    });
+});
+
+    $(document).on('click', '#printQuotationBtn', function() {
+        if (!selectedJobId) return;
+        Swal.fire({ title: 'Preparing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        $.ajax({
+            url: "{{ url('admin/job-books/print') }}", type: 'POST',
+            data: { _token: "{{ csrf_token() }}", job_id: selectedJobId, documents: ['quotation'] },
+            success: function(response) { Swal.close(); if (response.success && response.html) { var printTab = window.open(); printTab.document.write(response.html); printTab.document.close(); } }
+        });
+    });
+
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 });
 </script>
 @endsection

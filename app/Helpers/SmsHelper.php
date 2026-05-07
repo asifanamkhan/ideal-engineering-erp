@@ -67,7 +67,6 @@ class SmsHelper
             ]);
 
             return $response;
-
         } catch (\Exception $e) {
             Log::error('SMS sending failed: ' . $e->getMessage());
             return ['success' => false, 'message' => $e->getMessage()];
@@ -124,7 +123,6 @@ class SmsHelper
             $result = self::send($phone, $message, ucfirst($module) . ' Notification');
 
             return $result['success'] ?? false;
-
         } catch (\Exception $e) {
             Log::error('Party SMS failed: ' . $e->getMessage());
             return false;
@@ -167,7 +165,6 @@ class SmsHelper
             $result = self::send($gateway->admin_phone, $message, 'Admin Notification');
 
             return $result['success'] ?? false;
-
         } catch (\Exception $e) {
             Log::error('Admin SMS failed: ' . $e->getMessage());
             return false;
@@ -234,8 +231,12 @@ class SmsHelper
             $search[] = '{' . $key . '}';
             $replace[] = $value ?? '';
         }
+        $result = str_replace($search, $replace, $template);
 
-        return str_replace($search, $replace, $template);
+        \Log::info('replaceVariables result: ' . $result);
+
+        return $result;
+
     }
 
     /**
@@ -308,12 +309,190 @@ class SmsHelper
                 'message' => $errorMessage . ($errorDetail ? ': ' . $errorDetail : ''),
                 'response' => $responseData
             ];
-
         } catch (\Exception $e) {
             return [
                 'success' => false,
                 'message' => 'HTTP Error: ' . $e->getMessage()
             ];
         }
+    }
+    /**
+     * Send SMS for any event (Job Create, Expense Create, etc.)
+     *
+     * @param string $module (job, expense, payment)
+     * @param string $event (job_create, expense_create, invoice_create, etc.)
+     * @param int $typeId (job_id, expense_id, payment_id)
+     * @param array $extraVariables (optional extra variables)
+     * @return array
+     */
+    public static function sendForEvent($module, $event, $typeId, $extraVariables = [])
+    {
+        \Log::info('sendForEvent called with:', [
+            'module' => $module,
+            'event' => $event,
+            'typeId' => $typeId,
+            'extraVariables' => $extraVariables
+        ]);
+        try {
+            // Get template
+            $template = DB::table('sms_templates')
+                ->where('module', $module)
+                ->where('sub_module', $event)
+                ->first();
+            \Log::info('Template found: ' . ($template ? 'Yes' : 'No'));
+            if (!$template) {
+                return ['success' => false, 'message' => 'Template not found'];
+            }
+
+            // Prepare variables based on module
+            $variables = self::getVariablesByModule($module, $typeId);
+
+            // Merge extra variables
+            $variables = array_merge($variables, $extraVariables);
+
+            $results = [];
+
+            // Send to Party (if enabled)
+            if ($template->party_status == 1 && !empty($template->sms_text)) {
+                $phone = self::getPartyPhone($module, $typeId);
+                if ($phone) {
+                    $message = self::replaceVariables($template->sms_text, $variables);
+                    $results['party'] = self::send($phone, $message, ucfirst($module) . ' Notification');
+                }
+            }
+
+            // Send to Admin (if enabled)
+            if ($template->admin_status == 1 && !empty($template->admin_sms_text)) {
+                $gateway = DB::table('sms_gateways')->first();
+                if ($gateway && !empty($gateway->admin_phone)) {
+                    $message = self::replaceVariables($template->admin_sms_text, $variables);
+                    $results['admin'] = self::send($gateway->admin_phone, $message, 'Admin Notification');
+                }
+            }
+
+            return $results;
+        } catch (\Exception $e) {
+            Log::error('SMS send failed for event: ' . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Get variables based on module and type_id
+     */
+    private static function getVariablesByModule($module, $typeId)
+    {
+        $variables = [];
+
+        switch ($module) {
+            case 'job':
+                $job = DB::table('job_books')->where('id', $typeId)->first();
+                if ($job) {
+                    $customer = DB::table('customers')->where('id', $job->customer_id)->first();
+                    \Log::info('Customer data: ', (array)$customer);
+                    $variables = [
+                        'job_id' => $job->job_id,
+                        'customer_name' => $customer->name ?? 'N/A',
+                        'customer_phone' => $customer->phone ?? 'N/A',
+                        'job_date' => $job->job_date,
+                        'engine' => $job->engine ?? 'N/A',  // ← Already added
+                        'vehicle_registration_no' => $job->vehicle_registration_no,  // ← Already added
+                        'total_amount' => number_format($job->invoice_amount ?? 0, 2),
+                        'invoice_paid_amount' => number_format($job->invoice_paid_amount ?? 0, 2),
+                        'due_amount' => number_format(($job->invoice_amount ?? 0) - ($job->invoice_paid_amount ?? 0), 2),
+                        'status' => $job->job_status ?? 'pending',
+                    ];
+                }
+                break;
+
+            case 'expense':
+                $expense = DB::table('expenses')->where('id', $typeId)->first();
+                if ($expense) {
+                    $expenseDetails = DB::table('expense_details')
+                        ->leftJoin('expense_categories', 'expense_details.expense_category_id', '=', 'expense_categories.id')
+                        ->where('expense_details.expense_id', $typeId)
+                        ->first();
+
+                    $variables = [
+                        'expense_no' => $expense->expense_no,
+                        'amount' => number_format($expense->total_amount, 2),
+                        'date' => $expense->date,
+                        'category' => $expenseDetails->name ?? 'N/A',
+                        'narration' => $expense->narration ?? '',
+                        'status' => $expense->status == 1 ? 'Active' : 'Inactive',
+                    ];
+                }
+                break;
+
+            case 'salary':
+                $salary = DB::table('salaries')->where('id', $typeId)->first();
+                if ($salary) {
+                    $employee = DB::table('employees')->where('id', $salary->employee_id)->first();
+                    $variables = [
+                        'employee_name' => $employee->name ?? 'N/A',
+                        'employee_id' => $employee->employee_id ?? 'N/A',
+                        'amount' => number_format($salary->amount, 2),
+                        'salary_month' => $salary->salary_month,
+                        'payment_date' => $salary->payment_date,
+                        'department' => $employee->department ?? 'N/A',
+                        'designation' => $employee->designation ?? 'N/A',
+                    ];
+                }
+                break;
+
+            case 'purchase':
+                $purchase = DB::table('purchases')->where('id', $typeId)->first();
+                if ($purchase) {
+                    $supplier = DB::table('suppliers')->where('id', $purchase->supplier_id)->first();
+                    $variables = [
+                        'purchase_no' => $purchase->purchase_no,
+                        'supplier_name' => $supplier->name ?? 'N/A',
+                        'supplier_phone' => $supplier->phone ?? 'N/A',
+                        'amount' => number_format($purchase->total_amount, 2),
+                        'date' => $purchase->date,
+                        'status' => $purchase->status == 1 ? 'Active' : 'Inactive',
+                    ];
+                }
+                break;
+
+            case 'income':
+                $income = DB::table('incomes')->where('id', $typeId)->first();
+                if ($income) {
+                    $variables = [
+                        'income_no' => $income->income_no,
+                        'amount' => number_format($income->amount, 2),
+                        'date' => $income->date,
+                        'category' => $income->category,
+                        'narration' => $income->narration ?? '',
+                    ];
+                }
+                break;
+
+            case 'customer':
+                $customer = DB::table('customers')->where('id', $typeId)->first();
+                if ($customer) {
+                    $variables = [
+                        'customer_name' => $customer->name ?? 'N/A',
+                        'customer_phone' => $customer->phone ?? 'N/A',
+                        'customer_email' => $customer->email ?? 'N/A',
+                        'customer_address' => $customer->address ?? 'N/A',
+                    ];
+                }
+                break;
+
+            case 'supplier':
+                $supplier = DB::table('suppliers')->where('id', $typeId)->first();
+                if ($supplier) {
+                    $variables = [
+                        'supplier_name' => $supplier->name ?? 'N/A',
+                        'supplier_phone' => $supplier->phone ?? 'N/A',
+                        'supplier_email' => $supplier->email ?? 'N/A',
+                        'supplier_address' => $supplier->address ?? 'N/A',
+                    ];
+                }
+                break;
+        }
+
+        return $variables;
     }
 }

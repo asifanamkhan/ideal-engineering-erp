@@ -72,7 +72,7 @@ class CustomerController extends Controller
     {
         // Get the last customer ID
         $lastCustomer = DB::table('customers')
-            ->where('customer_id', 'LIKE', 'CUST%')
+            ->where('customer_id', 'LIKE', 'CUS%')
             ->orderBy('id', 'desc')
             ->first();
 
@@ -91,8 +91,8 @@ class CustomerController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:customers,email',
-            'phone' => 'required|string|max:20|unique:customers,phone',
+            'email' => 'nullable|email',
+            'phone' => 'required|string|max:20',
             'type' => 'required|in:individual,business',
             'address' => 'nullable|string',
             'status' => 'nullable|boolean'
@@ -180,8 +180,8 @@ class CustomerController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:customers,email,' . $id,  // Changed to nullable
-            'phone' => 'required|string|max:20|unique:customers,phone,' . $id,  // Added unique validation with ignore
+            'email' => 'nullable|email',  // Changed to nullable
+            'phone' => 'required|string',  // Added unique validation with ignore
             'type' => 'required|in:individual,business',
             'address' => 'nullable|string',
             'status' => 'nullable|boolean'
@@ -225,33 +225,34 @@ class CustomerController extends Controller
     }
 
     public function customer_search(Request $request)
-    {
-        $search = $request->get('search');
-        $page = $request->get('page', 1);
-        $perPage = 10;
+{
+    $search = $request->get('search');
+    $page = $request->get('page', 1);
+    $perPage = 10;
 
-        $customers = DB::table('customers')
-            ->where('name', 'LIKE', "%{$search}%")
-            ->orWhere('phone', 'LIKE', "%{$search}%")
-            ->orWhere('email', 'LIKE', "%{$search}%")
-            ->select('id', 'name', 'phone', 'email')
-            ->paginate($perPage, ['*'], 'page', $page);
+    $customers = DB::table('customers')
+        ->where('name', 'LIKE', "%{$search}%")
+        ->orWhere('phone', 'LIKE', "%{$search}%")
+        ->orWhere('email', 'LIKE', "%{$search}%")
+        ->select('id', 'name', 'phone', 'email')
+        ->paginate($perPage, ['*'], 'page', $page);
 
-        $results = [];
-        foreach ($customers as $customer) {
-            $results[] = [
-                'id' => $customer->id,
-                'name' => $customer->name,
-                'phone' => $customer->phone,
-                'email' => $customer->email
-            ];
-        }
-
-        return response()->json([
-            'results' => $results,
-            'pagination' => [
-                'more' => $customers->hasMorePages()
-            ]
-        ]);
+    $results = [];
+    foreach ($customers as $customer) {
+        $results[] = [
+            'id' => $customer->id,
+            'text' => $customer->name,  // ← এটা যোগ করো (Select2 expects 'text')
+            'name' => $customer->name,
+            'phone' => $customer->phone,
+            'email' => $customer->email
+        ];
     }
+
+    return response()->json([
+        'results' => $results,
+        'pagination' => [
+            'more' => $customers->hasMorePages()
+        ]
+    ]);
+}
 }

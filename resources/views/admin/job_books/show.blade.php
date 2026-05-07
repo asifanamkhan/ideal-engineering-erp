@@ -1,9 +1,10 @@
 @extends('layouts.dashboard.app')
 @section('css')
 <style>
-    .text-end{
+    .text-end {
         text-align: right;
     }
+
     .nav-pills .nav-link {
         padding: 0.5rem 1rem;
         font-size: 0.85rem;
@@ -12,27 +13,55 @@
         color: #4a5568;
         transition: all 0.2s ease;
     }
+
     .nav-pills .nav-link i {
         font-size: 0.85rem;
     }
+
     .nav-pills .nav-link.active {
         background-color: #4e73df;
         color: white;
         box-shadow: 0 2px 5px rgba(78, 115, 223, 0.3);
     }
+
     .nav-pills .nav-link:not(.active):hover {
         background-color: #e9ecef;
         color: #2c3e50;
     }
+
     .flex-nowrap {
         flex-wrap: nowrap;
     }
+
     .overflow-auto {
         overflow-x: auto;
         overflow-y: hidden;
     }
+
     .pb-1 {
         padding-bottom: 0.25rem;
+    }
+
+    .info-item {
+        background-color: #f8f9fc;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+
+    .info-item label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .info-item p {
+        margin-bottom: 0;
+        font-weight: 600;
+        color: #2c3e50;
     }
 </style>
 @endsection
@@ -66,25 +95,34 @@
                                     <div>
                                         <h5 class="mb-0 fw-bold">Job #{{ $jobBook->job_id ?? 'N/A' }}</h5>
                                         <div class="d-flex flex-wrap mt-1 text-muted" style="gap: 12px">
-                                            <span><i class="fas fa-user me-1"></i> Customer: {{ $jobBook->customer_name ?? 'N/A' }}</span>
-                                            <span><i class="fas fa-calendar me-1"></i> Job Date: {{ $jobBook->job_date ? \Carbon\Carbon::parse($jobBook->job_date)->format('d M, Y') : 'N/A' }}</span>
-                                            <span class="badge {{ $jobBook->job_status == 'completed' ? 'bg-success' : ($jobBook->job_status == 'in_progress' ? 'bg-info' : ($jobBook->job_status == 'pending' ? 'bg-warning' : 'bg-secondary')) }}">
-                                                <i class="fas fa-circle me-1 small"></i> {{ ucfirst(str_replace('_', ' ', $jobBook->job_status ?? 'Pending')) }}
+                                            <span><i class="fas fa-user me-1"></i> Customer: {{ $jobBook->customer_name
+                                                ?? 'N/A' }}</span>
+                                            <span><i class="fas fa-calendar me-1"></i> Job Date: {{ $jobBook->job_date ?
+                                                \Carbon\Carbon::parse($jobBook->job_date)->format('d M, Y') : 'N/A'
+                                                }}</span>
+                                            <span
+                                                class="badge {{ $jobBook->job_status == 'completed' ? 'bg-success' : ($jobBook->job_status == 'in_progress' ? 'bg-info' : ($jobBook->job_status == 'pending' ? 'bg-warning' : 'bg-secondary')) }}">
+                                                <i class="fas fa-circle me-1 small"></i> {{ ucfirst(str_replace('_', '
+                                                ', $jobBook->job_status ?? 'Pending')) }}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="d-flex " style="gap: 12px">
-                                    <button type="button" class="btn btn-sm btn-success print-btn" data-id="{{ $jobBook->id }}">
+                                    <button type="button" class="btn btn-sm btn-success print-btn"
+                                        data-id="{{ $jobBook->id }}">
                                         <i class="fas fa-print me-1"></i> Print
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-primary payment-btn" data-id="{{ $jobBook->id }}" data-customer-id="{{ $jobBook->customer_id }}">
+                                    <button type="button" class="btn btn-sm btn-primary payment-btn"
+                                        data-id="{{ $jobBook->id }}" data-customer-id="{{ $jobBook->customer_id }}">
                                         <i class="fas fa-money-bill-wave me-1"></i> Payment
                                     </button>
-                                    <a href="{{ route('admin.job-books.edit', $jobBook->id) }}" class="btn btn-sm btn-warning">
+                                    <a href="{{ route('admin.job-books.edit', $jobBook->id) }}"
+                                        class="btn btn-sm btn-warning">
                                         <i class="fas fa-edit me-1"></i> Edit
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{ $jobBook->id }}">
+                                    <button type="button" class="btn btn-sm btn-danger delete-btn"
+                                        data-id="{{ $jobBook->id }}">
                                         <i class="fas fa-trash me-1"></i> Delete
                                     </button>
                                 </div>
@@ -96,29 +134,41 @@
 
             <!-- Compact Nav Pills -->
             <div class="mb-3">
-                <ul class="nav nav-pills gap-1 flex-nowrap overflow-auto pb-1" style="gap: 0.25rem !important;" id="jobBookTab" role="tablist">
+                <ul class="nav nav-pills gap-1 flex-nowrap overflow-auto pb-1" style="gap: 0.25rem !important;"
+                    id="jobBookTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="job-tab" data-bs-toggle="pill" data-bs-target="#job" type="button" role="tab">
+                        <button class="nav-link active" id="job-tab" data-bs-toggle="pill" data-bs-target="#job"
+                            type="button" role="tab">
                             <i class="fas fa-briefcase me-1"></i> Job
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="parts-tab" data-bs-toggle="pill" data-bs-target="#parts" type="button" role="tab">
+                        <button class="nav-link" id="descriptions-tab" data-bs-toggle="pill"
+                            data-bs-target="#descriptions" type="button" role="tab">
+                            <i class="fas fa-list me-1"></i> Descriptions
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="parts-tab" data-bs-toggle="pill" data-bs-target="#parts"
+                            type="button" role="tab">
                             <i class="fas fa-microchip me-1"></i> Parts
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="quotations-tab" data-bs-toggle="pill" data-bs-target="#quotations" type="button" role="tab">
+                        <button class="nav-link" id="quotations-tab" data-bs-toggle="pill" data-bs-target="#quotations"
+                            type="button" role="tab">
                             <i class="fas fa-file-alt me-1"></i> Quotations
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="invoices-tab" data-bs-toggle="pill" data-bs-target="#invoices" type="button" role="tab">
+                        <button class="nav-link" id="invoices-tab" data-bs-toggle="pill" data-bs-target="#invoices"
+                            type="button" role="tab">
                             <i class="fas fa-receipt me-1"></i> Invoices
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="payment-tab" data-bs-toggle="pill" data-bs-target="#payment" type="button" role="tab">
+                        <button class="nav-link" id="payment-tab" data-bs-toggle="pill" data-bs-target="#payment"
+                            type="button" role="tab">
                             <i class="fas fa-credit-card me-1"></i> Payment
                         </button>
                     </li>
@@ -149,14 +199,17 @@
                                     <div class="info-item p-2 bg-light rounded">
                                         <label class="text-muted small mb-0">Customer</label>
                                         <p class="fw-semibold mb-0">{{ $jobBook->customer_name ?? 'N/A' }}</p>
-                                        <small class="text-muted">Phone: {{ $jobBook->customer_phone ?? 'N/A' }}</small><br>
-                                        <small class="text-muted">Address: {{ $jobBook->customer_address ?? 'N/A' }}</small>
+                                        <small class="text-muted">Phone: {{ $jobBook->customer_phone ?? 'N/A'
+                                            }}</small><br>
+                                        <small class="text-muted">Address: {{ $jobBook->customer_address ?? 'N/A'
+                                            }}</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-lg-4">
                                     <div class="info-item p-2 bg-light rounded">
                                         <label class="text-muted small mb-0">Job Date</label>
-                                        <p class="fw-semibold mb-0">{{ $jobBook->job_date ? \Carbon\Carbon::parse($jobBook->job_date)->format('d M, Y') : 'N/A' }}</p>
+                                        <p class="fw-semibold mb-0">{{ $jobBook->job_date ?
+                                            \Carbon\Carbon::parse($jobBook->job_date)->format('d M, Y') : 'N/A' }}</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-lg-4">
@@ -167,9 +220,16 @@
                                 </div>
                                 <div class="col-md-6 col-lg-4">
                                     <div class="info-item p-2 bg-light rounded">
+                                        <label class="text-muted small mb-0">Vehicle Registration</label>
+                                        <p class="fw-semibold mb-0">{{ $jobBook->vehicle_registration_no ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="info-item p-2 bg-light rounded">
                                         <label class="text-muted small mb-0">Job Status</label>
                                         <p class="fw-semibold mb-0">
-                                            <span class="badge {{ $jobBook->job_status == 'completed' ? 'bg-success' : ($jobBook->job_status == 'in_progress' ? 'bg-info' : ($jobBook->job_status == 'pending' ? 'bg-warning' : 'bg-secondary')) }}">
+                                            <span
+                                                class="badge {{ $jobBook->job_status == 'completed' ? 'bg-success' : ($jobBook->job_status == 'in_progress' ? 'bg-info' : ($jobBook->job_status == 'pending' ? 'bg-warning' : 'bg-secondary')) }}">
                                                 {{ ucfirst(str_replace('_', ' ', $jobBook->job_status ?? 'Pending')) }}
                                             </span>
                                         </p>
@@ -179,8 +239,10 @@
                                     <div class="info-item p-2 bg-light rounded">
                                         <label class="text-muted small mb-0">Parts Status</label>
                                         <p class="fw-semibold mb-0">
-                                            <span class="badge {{ $jobBook->parts_status == 'received' ? 'bg-success' : ($jobBook->parts_status == 'partial' ? 'bg-warning' : 'bg-danger') }}">
-                                                {{ ucfirst(str_replace('_', ' ', $jobBook->parts_status ?? 'Not Received')) }}
+                                            <span
+                                                class="badge {{ $jobBook->parts_status == 'received' ? 'bg-success' : ($jobBook->parts_status == 'partial' ? 'bg-warning' : 'bg-danger') }}">
+                                                {{ ucfirst(str_replace('_', ' ', $jobBook->parts_status ?? 'Not
+                                                Received')) }}
                                             </span>
                                         </p>
                                     </div>
@@ -188,13 +250,16 @@
                                 <div class="col-md-6 col-lg-4">
                                     <div class="info-item p-2 bg-light rounded">
                                         <label class="text-muted small mb-0">Delivery Date</label>
-                                        <p class="fw-semibold mb-0">{{ $jobBook->delivery_date ? \Carbon\Carbon::parse($jobBook->delivery_date)->format('d M, Y') : 'N/A' }}</p>
+                                        <p class="fw-semibold mb-0">{{ $jobBook->delivery_date ?
+                                            \Carbon\Carbon::parse($jobBook->delivery_date)->format('d M, Y') : 'N/A' }}
+                                        </p>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-lg-4">
                                     <div class="info-item p-2 bg-light rounded">
                                         <label class="text-muted small mb-0">Assign To</label>
-                                        <p class="fw-semibold mb-0">{{ $jobBook->assign_to_names ?? $jobBook->assign_to ?? 'N/A' }}</p>
+                                        <p class="fw-semibold mb-0">{{ $jobBook->assign_to_names ?? $jobBook->assign_to
+                                            ?? 'N/A' }}</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6 col-lg-4">
@@ -202,7 +267,8 @@
                                         <label class="text-muted small mb-0">Created By</label>
                                         <p class="fw-semibold mb-0">
                                             @php
-                                                $createdUser = DB::table('users')->where('id', $jobBook->created_by)->first();
+                                            $createdUser = DB::table('users')->where('id',
+                                            $jobBook->created_by)->first();
                                             @endphp
                                             {{ $createdUser->name ?? 'N/A' }}
                                         </p>
@@ -219,13 +285,45 @@
                                     <div class="info-item p-2 bg-light rounded">
                                         <label class="text-muted small mb-0">Documents</label>
                                         <p class="mb-0">
-                                            <a href="{{ asset($jobBook->documents) }}" target="_blank" class="btn btn-sm btn-link p-0">
+                                            <a href="{{ asset($jobBook->documents) }}" target="_blank"
+                                                class="btn btn-sm btn-link p-0">
                                                 <i class="fas fa-file-download me-1"></i> View Document
                                             </a>
                                         </p>
                                     </div>
                                 </div>
                                 @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- DESCRIPTIONS TAB --}}
+                <div class="tab-pane fade" id="descriptions" role="tabpanel">
+                    <div class="card shadow-sm border-0 rounded-3">
+                        <div class="card-body p-4">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-head">
+                                        <tr>
+                                            <th width="5%">#</th>
+                                            <th width="95%">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($jobDescriptions as $index => $desc)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $desc->description ?? 'N/A' }}</td>
+                                        </tr>
+                                        @empty
+                                        <tr>
+                                            <td colspan="2" class="text-center py-4 text-muted">No descriptions found
+                                            </td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -243,8 +341,7 @@
                                             <th>Part No</th>
                                             <th>Size</th>
                                             <th class="text-center">Quantity</th>
-                                            <th class="text-end">Unit Price</th>
-                                            <th class="text-end pe-3">Total</th>
+
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -254,12 +351,13 @@
                                             <td>{{ $part->part_no ?? 'N/A' }}</td>
                                             <td>{{ $part->size_name ?? 'N/A' }}</td>
                                             <td class="text-center">{{ $part->quantity ?? '0' }}</td>
-                                            <td class="text-end">৳ {{ number_format($part->single_price ?? 0, 2) }}</td>
-                                            <td class="text-end pe-3">৳ {{ number_format($part->total_price ?? 0, 2) }}</td>
+
+                                            
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="6" class="text-center py-4 text-muted">No parts records found</td>
+                                            <td colspan="6" class="text-center py-4 text-muted">No parts records found
+                                            </td>
                                         </tr>
                                         @endforelse
                                     </tbody>
@@ -267,7 +365,8 @@
                                     <tfoot class="bg-light">
                                         <tr>
                                             <th colspan="5" class="text-end fw-bold">Total Parts Amount:</th>
-                                            <th class="text-end pe-3 fw-bold">৳ {{ number_format($jobParts->sum('total_price'), 2) }}</th>
+                                            <th class="text-end pe-3 fw-bold">৳ {{
+                                                number_format($jobParts->sum('total_price'), 2) }}</th>
                                         </tr>
                                     </tfoot>
                                     @endif
@@ -280,52 +379,86 @@
                 {{-- QUOTATIONS TAB --}}
                 <div class="tab-pane fade" id="quotations" role="tabpanel">
                     <div class="card shadow-sm border-0 rounded-3">
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
+                        <div class="card-body p-4">
+                            <!-- Quotation Header Info - بدون کارڈ -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="info-item p-2 bg-light rounded">
+                                        <label class="text-muted small text-uppercase mb-0">Subject</label>
+                                        <p class="fw-bold mb-0">{{ $jobBook->quotation_subject ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item p-2 bg-light rounded">
+                                        <label class="text-muted small text-uppercase mb-0">Status</label>
+                                        <p class="mb-0">
+                                            <span
+                                                class="badge {{ $jobBook->quotation_status == 'send' ? 'bg-success' : ($jobBook->quotation_status == 'pending' ? 'bg-warning' : 'bg-danger') }}">
+                                                <i
+                                                    class="fas {{ $jobBook->quotation_status == 'send' ? 'fa-paper-plane' : ($jobBook->quotation_status == 'pending' ? 'fa-clock' : 'fa-times-circle') }} me-1"></i>
+                                                {{ ucfirst(str_replace('_', ' ', $jobBook->quotation_status ?? 'Not
+                                                Send')) }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="info-item p-2 bg-light rounded">
+                                        <label class="text-muted small text-uppercase mb-0">Description</label>
+                                        <p class="mb-0">{{ $jobBook->quotation_description ?? 'No description available'
+                                            }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quotation Items Table -->
+                            <div class="table-responsive mt-3">
                                 <table class="table table-sm table-hover mb-0">
                                     <thead class="table-head">
                                         <tr>
-                                            <th class="ps-3">Service Name</th>
-                                            <th>Unit</th>
-                                            <th class="text-center">Quantity</th>
-                                            <th class="text-end">Unit Price</th>
-                                            <th class="text-end pe-3">Total</th>
+                                            <th width="5%">#</th>
+                                            <th width="35%">Service Name</th>
+                                            <th width="10%">Unit</th>
+                                            <th width="10%" class="text-center">Quantity</th>
+                                            <th width="15%" class="text-end">Unit Price</th>
+                                            <th width="15%" class="text-end">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($quotations as $quotation)
+                                        @forelse($quotations as $index => $quotation)
                                         <tr>
-                                            <td class="ps-3">{{ $quotation->service_name ?? 'N/A' }}</td>
-                                            <td>{{ $quotation->unit_name ?? 'N/A' }}</td>
-                                            <td class="text-center">{{ $quotation->quantity ?? '0' }}</td>
-                                            <td class="text-end">৳ {{ number_format($quotation->price ?? 0, 2) }}</td>
-                                            <td class="text-end pe-3">৳ {{ number_format($quotation->total_price ?? 0, 2) }}</td>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $quotation->service_name ?? 'N/A' }}</td>
+                                        <td>{{ $quotation->unit_name ?? 'N/A' }}</td>
+                                        <td class="text-center">{{ $quotation->quantity ?? '0' }}</td>
+                                        <td class="text-end">৳ {{ number_format($quotation->price ?? 0, 2) }}</td>
+                                        <td class="text-end">৳ {{ number_format($quotation->total_price ?? 0, 2) }}</td>
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="5" class="text-center py-4 text-muted">No quotations found</td>
+                                            <td colspan="6" class="text-center py-4 text-muted">No quotations found</td>
                                         </tr>
                                         @endforelse
                                     </tbody>
                                     <tfoot class="bg-light">
-                                        <tr>
-                                            <th colspan="4" class="text-end fw-bold">Quotation Amount:</th>
-                                            <th class="text-end pe-3 fw-bold">৳ {{ number_format($jobBook->quotation_amount ?? 0, 2) }}</th>
-                                        </tr>
-                                        <tr>
-                                            <th colspan="4" class="text-end fw-bold">Status:</th>
-                                            <th class="text-end pe-3">
-                                                <span class="badge {{ $jobBook->quotation_status == 'send' ? 'bg-success' : ($jobBook->quotation_status == 'pending' ? 'bg-warning' : 'bg-danger') }}">
-                                                    {{ ucfirst(str_replace('_', ' ', $jobBook->quotation_status ?? 'Not Send')) }}
-                                                </span>
+                                        <tr class="border-top">
+                                            <th colspan="5" class="text-end fw-bold">Subtotal:</th>
+                                            <th class="text-end fw-bold">৳ {{ number_format($quotationSubtotal, 2) }}
                                             </th>
                                         </tr>
-                                        @if($jobBook->quotation_description)
+                                        @if($jobBook->quotation_vat && $jobBook->quotation_vat > 0)
                                         <tr>
-                                            <th colspan="4" class="text-end fw-bold">Description:</th>
-                                            <th class="text-end pe-3">{{ $jobBook->quotation_description }}</th>
+                                            <th colspan="5" class="text-end fw-bold">VAT ({{ $jobBook->quotation_vat
+                                                }}%):</th>
+                                            <th class="text-end fw-bold">৳ {{ number_format($quotationVatAmount, 2) }}
+                                            </th>
                                         </tr>
                                         @endif
+                                        <tr style="background-color: #4e73df; color: white;">
+                                            <th colspan="5" class="text-end fw-bold">Grand Total:</th>
+                                            <th class="text-end fw-bold">৳ {{ number_format($quotationGrandTotal, 2) }}
+                                            </th>
+                                        </tr>
                                     </tfoot>
                                 </table>
                             </div>
@@ -333,59 +466,97 @@
                     </div>
                 </div>
 
+
                 {{-- INVOICES TAB --}}
                 <div class="tab-pane fade" id="invoices" role="tabpanel">
                     <div class="card shadow-sm border-0 rounded-3">
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
+                        <div class="card-body p-4">
+                            <!-- Invoice Header Info - بدون کارڈ -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="info-item p-2 bg-light rounded">
+                                        <label class="text-muted small text-uppercase mb-0">Invoice Date</label>
+                                        <p class="fw-bold mb-0">{{ $jobBook->invoice_date ?
+                                            \Carbon\Carbon::parse($jobBook->invoice_date)->format('d M, Y') : 'N/A' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-item p-2 bg-light rounded">
+                                        <label class="text-muted small text-uppercase mb-0">Status</label>
+                                        <p class="mb-0">
+                                            <span
+                                                class="badge {{ $jobBook->invoice_status == 'paid' ? 'bg-success' : ($jobBook->invoice_status == 'partial' ? 'bg-warning' : 'bg-danger') }}">
+                                                <i
+                                                    class="fas {{ $jobBook->invoice_status == 'paid' ? 'fa-check-circle' : ($jobBook->invoice_status == 'partial' ? 'fa-clock' : 'fa-times-circle') }} me-1"></i>
+                                                {{ ucfirst($jobBook->invoice_status ?? 'Unpaid') }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="info-item p-2 bg-light rounded">
+                                        <label class="text-muted small text-uppercase mb-0">Description</label>
+                                        <p class="mb-0">{{ $jobBook->invoice_description ?? 'No description available'
+                                            }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Invoice Items Table -->
+                            <div class="table-responsive mt-3">
                                 <table class="table table-sm table-hover mb-0">
                                     <thead class="table-head">
                                         <tr>
-                                            <th class="ps-3">Service Name</th>
-                                            <th>Unit</th>
-                                            <th class="text-center">Quantity</th>
-                                            <th class="text-end">Unit Price</th>
-                                            <th class="text-end pe-3">Total</th>
+                                            <th width="5%">#</th>
+                                            <th width="35%">Service Name</th>
+                                            <th width="10%">Unit</th>
+                                            <th width="10%" class="text-center">Quantity</th>
+                                            <th width="15%" class="text-end">Unit Price</th>
+                                            <th width="15%" class="text-end">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($invoices as $invoice)
+                                        @forelse($invoices as $index => $invoice)
                                         <tr>
-                                            <td class="ps-3">{{ $invoice->service_name ?? 'N/A' }}</td>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $invoice->service_name ?? 'N/A' }}</td>
                                             <td>{{ $invoice->unit_name ?? 'N/A' }}</td>
                                             <td class="text-center">{{ $invoice->quantity ?? '0' }}</td>
                                             <td class="text-end">৳ {{ number_format($invoice->price ?? 0, 2) }}</td>
-                                            <td class="text-end pe-3">৳ {{ number_format($invoice->total_price ?? 0, 2) }}</td>
+                                            <td class="text-end">৳ {{ number_format($invoice->total_price ?? 0, 2) }}
+                                            </td>
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="5" class="text-center py-4 text-muted">No invoices found</td>
+                                            <td colspan="6" class="text-center py-4 text-muted">No invoices found</td>
                                         </tr>
                                         @endforelse
                                     </tbody>
                                     <tfoot class="bg-light">
-                                        <tr>
-                                            <th colspan="4" class="text-end fw-bold">Discount:</th>
-                                            <th class="text-end pe-3 fw-bold text-danger">- ৳ {{ number_format($jobBook->invoice_discount ?? 0, 2) }}</th>
+                                        <tr class="border-top">
+                                            <th colspan="5" class="text-end fw-bold">Subtotal:</th>
+                                            <th class="text-end fw-bold">৳ {{ number_format($invoiceSubtotal, 2) }}</th>
                                         </tr>
+                                        @if($invoiceDiscount > 0)
                                         <tr>
-                                            <th colspan="4" class="text-end fw-bold">Total Amount:</th>
-                                            <th class="text-end pe-3 fw-bold">৳ {{ number_format($jobBook->invoice_amount ?? 0, 2) }}</th>
-                                        </tr>
-                                        <tr>
-                                            <th colspan="4" class="text-end fw-bold">Status:</th>
-                                            <th class="text-end pe-3">
-                                                <span class="badge {{ $jobBook->invoice_status == 'paid' ? 'bg-success' : ($jobBook->invoice_status == 'partial' ? 'bg-warning' : 'bg-danger') }}">
-                                                    {{ ucfirst($jobBook->invoice_status ?? 'Unpaid') }}
-                                                </span>
-                                            </th>
-                                        </tr>
-                                        @if($jobBook->invoice_description)
-                                        <tr>
-                                            <th colspan="4" class="text-end fw-bold">Description:</th>
-                                            <th class="text-end pe-3">{{ $jobBook->invoice_description }}</th>
+                                            <th colspan="5" class="text-end fw-bold">Discount:</th>
+                                            <th class="text-end fw-bold text-danger">- ৳ {{
+                                                number_format($invoiceDiscount, 2) }}</th>
                                         </tr>
                                         @endif
+                                        @if($invoiceVatAmount > 0)
+                                        <tr>
+                                            <th colspan="5" class="text-end fw-bold">VAT:</th>
+                                            <th class="text-end fw-bold">৳ {{ number_format($invoiceVatAmount, 2) }}
+                                            </th>
+                                        </tr>
+                                        @endif
+                                        <tr style="background-color: #4e73df; color: white;">
+                                            <th colspan="5" class="text-end fw-bold">Grand Total:</th>
+                                            <th class="text-end fw-bold">৳ {{ number_format($invoiceGrandTotal, 2) }}
+                                            </th>
+                                        </tr>
                                     </tfoot>
                                 </table>
                             </div>
@@ -399,24 +570,17 @@
                         <div class="card-body">
                             <!-- Payment Summary Cards -->
                             @php
-                                $totalPaid = DB::table('payments')->where('type', 'job')->where('type_id', $jobBook->id)->sum('amount');
-                                $dueAmount = ($jobBook->invoice_amount ?? 0) - ($jobBook->invoice_discount ?? 0) - $totalPaid;
-                                $paymentCount = DB::table('payments')->where('type', 'job')->where('type_id', $jobBook->id)->count();
+                            $totalPaid = DB::table('payments')->where('type', 'job')->where('type_id',
+                            $jobBook->id)->sum('amount');
+                            $dueAmount = ($invoiceGrandTotal ?? 0) - $totalPaid;
                             @endphp
                             <div class="row mb-4">
                                 <div class="col-md-3">
                                     <div class="card bg-light">
                                         <div class="card-body text-center">
                                             <h6 class="text-muted mb-2">Total Invoice</h6>
-                                            <h4 class="mb-0 text-primary">৳ {{ number_format($jobBook->invoice_amount ?? 0, 2) }}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card bg-light">
-                                        <div class="card-body text-center">
-                                            <h6 class="text-muted mb-2">Discount</h6>
-                                            <h4 class="mb-0 text-warning">- ৳ {{ number_format($jobBook->invoice_discount ?? 0, 2) }}</h4>
+                                            <h4 class="mb-0 text-primary">৳ {{ number_format($invoiceGrandTotal, 2) }}
+                                            </h4>
                                         </div>
                                     </div>
                                 </div>
@@ -452,7 +616,9 @@
                                         </tr>
                                     </thead>
                                     <tbody id="show-payment-history-body">
-                                        <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                                        <tr>
+                                            <td colspan="6" class="text-center">Loading...</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -465,7 +631,8 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -486,7 +653,8 @@
 </div>
 
 <!-- Print Options Modal -->
-<div class="modal fade" id="printOptionsModal" tabindex="-1" role="dialog" aria-labelledby="printOptionsModalLabel" aria-hidden="true">
+<div class="modal fade" id="printOptionsModal" tabindex="-1" role="dialog" aria-labelledby="printOptionsModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -581,7 +749,7 @@
                 }
             },
             error: function() {
-                $('#show-payment-history-body').html('<tr><td colspan="6" class="text-center text-danger">Failed to load payment history</td></tr>');
+                $('#show-payment-history-body').html('</td><td colspan="6" class="text-center text-danger">Failed to load payment history</td></tr>');
             }
         });
     }

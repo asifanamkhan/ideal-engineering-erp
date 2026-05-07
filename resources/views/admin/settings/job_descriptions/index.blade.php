@@ -1,0 +1,354 @@
+@extends('layouts.dashboard.app')
+
+@section('css')
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
+<style>
+
+</style>
+@endsection
+
+@section('content')
+<div class="container-fluid">
+    <div class="page-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h4 class="mb-1"><i class="fas fa-asterisk"></i> All Job description List</h4>
+            </div>
+
+            <div>
+                <a href="#" class="btn btn-primary btn shadow-sm px-5" id="addNewPart">
+                    <i class="fas fa-plus "></i> Add New Job description
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered" id="job_descriptions-table" width="100%" cellspacing="0">
+                    <thead class="table-head">
+                        <tr>
+                            <th>#</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Default</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be loaded via AJAX -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal fade" id="partModal" tabindex="-1" aria-labelledby="partModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="partModalLabel">Add New Job description</h5>
+                {{-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> --}}
+            </div>
+            <form id="serviceForm" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div id="formErrors" class="alert alert-danger d-none"></div>
+
+                    <input type="hidden" id="part_id" name="part_id">
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="is_default" class="form-label">Default</label>
+                        <select class="form-control" id="is_default" name="is_default">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-control" id="status" name="status">
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save Job description</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('js')
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $('#settings-sidebar').addClass('active');
+    $('#job_descriptions-index-sidebar').addClass('active');
+    $('#collapseSettings').addClass('show');
+
+    $(document).ready(function() {
+        // Initialize DataTable
+        var table = $('#job_descriptions-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{{ route('admin.job_descriptions.index') }}",
+            columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, width: '5%' },
+                { data: 'description', name: 'description', width: '40%' },
+                { data: 'status_badge', name: 'status', width: '15%', orderable: false, searchable: false, className: 'text-center' },
+                { data: 'is_default', name: 'is_default', width: '15%', orderable: false, searchable: false, className: 'text-center' },
+
+                { data: 'action', name: 'action', orderable: false, searchable: false, width: '15%', className: 'text-center' }
+            ],
+            order: [[1, 'asc']],
+            dom: '<"row"<"col-sm-12 col-md-4"l><"col-sm-12 col-md-4 text-center"B><"col-sm-12 col-md-4"f>>' +
+                 '<"row"<"col-sm-12"tr>>' +
+                 '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+            pageLength: 10,
+            responsive: true,
+            language: {
+                search: "_INPUT_",
+                searchPlaceholder: "Search job_descriptions...",
+                lengthMenu: "Show _MENU_ entries",
+                zeroRecords: "No job_descriptions found",
+                info: "Showing _START_ to _END_ of _TOTAL_ job_descriptions",
+                infoEmpty: "No job_descriptions available",
+                infoFiltered: "(filtered from _MAX_ total job_descriptions)",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            }
+        });
+
+        // Add New Job description button click
+        $('#addNewPart').click(function() {
+            resetForm();
+            $('#partModalLabel').text('Add New Job description');
+            $('#serviceForm').attr('action', '{{ route("admin.job_descriptions.store") }}');
+            // Remove any existing method field
+            $('#methodField').remove();
+            $('#partModal').modal('show');
+        });
+
+        // Edit button click
+        $(document).on('click', '.edit-btn', function() {
+            var id = $(this).data('id');
+            resetForm();
+
+            // Show loading in SweetAlert
+            Swal.fire({
+                title: 'Loading...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: "{{ url('admin/job_descriptions') }}/" + id + "/edit",
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    Swal.close();
+
+                    $('#partModalLabel').text('Edit Job description');
+                    $('#serviceForm').attr('action', '{{ url("admin/job_descriptions") }}/' + id);
+
+                    // Add hidden method field for PUT request
+                    if ($('#methodField').length === 0) {
+                        $('#serviceForm').append('<input type="hidden" name="_method" id="methodField" value="PUT">');
+                    } else {
+                        $('#methodField').val('PUT');
+                    }
+
+                    $('#part_id').val(data.id);
+
+                    // Fix for status dropdown - convert 1/2 to select option
+                    if (data.status == 1) {
+                        $('#status').val('1');
+                    } else if (data.status == 2) {
+                        $('#status').val('0');
+                    } else {
+                        $('#status').val(data.status);
+                    }
+
+                    if (data.is_default == 1) {
+                        $('#is_default').val('1');
+                    } else if (data.is_default == 0) {
+                        $('#is_default').val('0');
+                    } else {
+                        $('#is_default').val(data.is_default);
+                    }
+
+                    $('#description').val(data.description);
+                    $('#partModal').modal('show');
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Failed to load job_description data',
+                        confirmButtonColor: '#4e73df'
+                    });
+                }
+            });
+        });
+
+        // Form submission
+        $('#serviceForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var form = $(this);
+            var url = form.attr('action');
+            var formData = form.serialize();
+
+            // Clear previous errors
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').empty();
+            $('#formErrors').addClass('d-none').empty();
+
+            // Show loading in SweetAlert
+            Swal.fire({
+                title: 'Saving...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    Swal.close();
+                    $('#partModal').modal('hide');
+                    table.ajax.reload(null, false);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message,
+                        confirmButtonColor: '#4e73df',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                },
+                error: function(xhr) {
+                    Swal.close();
+
+                    if (xhr.status === 422) {
+                        var errors = xhr.responseJSON.errors;
+                        var errorHtml = '<ul class="mb-0">';
+                        $.each(errors, function(key, value) {
+                            errorHtml += '<li>' + value[0] + '</li>';
+                            $('#' + key).addClass('is-invalid');
+                            $('#' + key).siblings('.invalid-feedback').text(value[0]);
+                        });
+                        errorHtml += '</ul>';
+                        // $('#formErrors').removeClass('d-none').html(errorHtml);
+
+                        // Scroll to error
+                        $('html, body').animate({
+                            scrollTop: $('#formErrors').offset().top - 100
+                        }, 500);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: xhr.responseJSON?.error || 'Something went wrong!',
+                            confirmButtonColor: '#4e73df'
+                        });
+                    }
+                }
+            });
+        });
+
+        // Delete button click with SweetAlert
+        $(document).on('click', '.delete-btn', function() {
+            var id = $(this).data('id');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74a3b',
+                cancelButtonColor: '#858796',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return $.ajax({
+                        url: "{{ url('admin/job_descriptions') }}/" + id,
+                        type: 'DELETE',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        }
+                    }).then(response => {
+                        return response;
+                    }).catch(error => {
+                        Swal.showValidationMessage('Request failed: ' + (error.responseJSON?.error || 'Something went wrong'));
+                    });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    table.ajax.reload(null, false);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: result.value.message,
+                        confirmButtonColor: '#4e73df',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        });
+
+        // Reset form when modal is hidden
+        $('#partModal').on('hidden.bs.modal', function() {
+            resetForm();
+            $('#methodField').remove();
+        });
+
+        // Reset form function
+        function resetForm() {
+            $('#serviceForm')[0].reset();
+            $('#part_id').val('');
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').empty();
+            $('#formErrors').addClass('d-none').empty();
+        }
+    });
+</script>
+@endsection

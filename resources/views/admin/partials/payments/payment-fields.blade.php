@@ -28,7 +28,7 @@
 <div class="row">
     <div class="col-md-6 mb-3">
         <label>Payment Amount <span class="text-danger">*</span></label>
-        <input type="number" name="payment_amount" id="payment_amount" class="form-control" step="0.01">
+        <input type="number" name="payment_amount" id="payment_amount" class="form-control" step="0.01" value="0">
         <small class="text-muted">Max: <span id="max_due">0.00</span></small>
     </div>
     <div class="col-md-6 mb-3">

@@ -100,6 +100,7 @@ class PaymentHelper
                     'customer_name' => $this->getCustomerName($paymentFor, $paymentForId),
                     'job_id' => $type == 'job' ? $this->getJobId($typeId) : null,
                     'expense_no' => $type == 'expense' ? $this->getExpenseNo($typeId) : null,
+                    'total_amount' => number_format($totalAmount, 2),
                 ];
 
                 // Send SMS for payment
@@ -272,20 +273,18 @@ class PaymentHelper
         try {
             $entityTable = $entityData['table'] ?? $type . 's';
             $amountField = $entityData['amount_field'] ?? 'amount';
-            $discountField = $entityData['discount_field'] ?? null;  // null by default
+            $discountField = $entityData['discount_field'] ?? null;
             $paidField = $entityData['paid_field'] ?? 'paid_amount';
 
             // সিলেক্ট করার জন্য ফিল্ড তৈরি
             $selectFields = ['id', $amountField, $paidField];
 
-            // discount_field দেওয়া থাকলে এবং টেবিলে কলাম থাকলে তবেই যোগ করো
             if ($discountField) {
-                // চেক করো কলাম টেবিলে আছে কিনা
                 $columns = DB::getSchemaBuilder()->getColumnListing($entityTable);
                 if (in_array($discountField, $columns)) {
                     $selectFields[] = $discountField;
                 } else {
-                    $discountField = null; // কলাম না থাকলে null করে দাও
+                    $discountField = null;
                 }
             }
 
@@ -298,13 +297,16 @@ class PaymentHelper
                 return ['success' => false, 'message' => ucfirst($type) . ' not found'];
             }
 
-            // discount থাকলে বিয়োগ করো, না থাকলে 0
-            $discount = 0;
-            if ($discountField && property_exists($entity, $discountField)) {
-                $discount = $entity->$discountField ?? 0;
-            }
+            // ========== এখানে পরিবর্তন ==========
+            // যদি amount_field = 'invoice_amount' হয়, তাহলে discount বিয়োগ করো না
+            // কারণ invoice_amount ইতিমধ্যেই calculated (discount এবং VAT সহ)
+            $totalAmount = $entity->$amountField;
 
-            $totalAmount = $entity->$amountField - $discount;
+            // নোট: যদি কখনো discount_field ব্যবহার করতে হয়, তাহলে নিচের লাইন ব্যবহার করো
+            // কিন্তু job_books এর জন্য discount_field ব্যবহার করো না
+            // $totalAmount = $entity->$amountField - ($discountField && property_exists($entity, $discountField) ? ($entity->$discountField ?? 0) : 0);
+            // ===================================
+
             $paidAmount = DB::table('payments')->where('type', $type)->where('type_id', $typeId)->sum('amount');
 
             if ($paidAmount == 0) {

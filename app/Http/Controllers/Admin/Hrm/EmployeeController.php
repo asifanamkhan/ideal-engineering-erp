@@ -476,7 +476,7 @@ class EmployeeController extends Controller
         }
 
         try {
-            // Get employee details with salary fields from employees table
+            // Get employee details with all salary fields
             $employee = DB::table('employees')
                 ->leftJoin('designations', 'employees.designation_id', '=', 'designations.id')
                 ->leftJoin('branches', 'employees.branch_id', '=', 'branches.id')
@@ -490,6 +490,11 @@ class EmployeeController extends Controller
 
             if (!$employee) {
                 return response()->json(['error' => 'Employee not found'], 404);
+            }
+
+            // Make sure default_overtime_hour is included
+            if (!isset($employee->default_overtime_hour)) {
+                $employee->default_overtime_hour = 0;
             }
 
             // Render partial views
@@ -514,6 +519,7 @@ class EmployeeController extends Controller
             'total_allowance' => 'nullable|numeric|min:0',
             'total_deduction' => 'nullable|numeric|min:0',
             'overtime_rate' => 'nullable|numeric|min:0',
+            'default_overtime_hour' => 'nullable|numeric|min:0',
             'effective_date' => 'nullable|date'
         ]);
 
@@ -526,6 +532,7 @@ class EmployeeController extends Controller
             $totalAllowance = $request->total_allowance ?? 0;
             $totalDeduction = $request->total_deduction ?? 0;
             $overtimeRate = $request->overtime_rate ?? 0;
+            $defaultOvertimeHour = $request->default_overtime_hour ?? 0;
 
             // Calculate gross salary
             $grossSalary = $basicSalary + $totalAllowance - $totalDeduction;
@@ -536,6 +543,7 @@ class EmployeeController extends Controller
                 'total_allowance' => $totalAllowance,
                 'total_deduction' => $totalDeduction,
                 'overtime_rate' => $overtimeRate,
+                'default_overtime_hour' => $defaultOvertimeHour,
                 'gross_salary' => $grossSalary,
                 // 'salary_effective_date' => $request->effective_date ?? date('Y-m-d'),
                 'updated_at' => now()

@@ -100,11 +100,11 @@
                             <th width="4%">#</th>
                             <th width="8%">Job ID</th>
                             <th width="18%">Customer</th>
-                            <th width="15%">Date</th>
-                            <th width="8%">Engine</th>
-                            <th width="14%">Status</th>
-                            <th width="14%">Quotation</th>
-                            <th width="14%">Invoice</th>
+                            <th width="14%">Date</th>
+                            <th width="14%">Vehicle</th>
+                            <th width="7%">Status</th>
+                            <th width="15%">Quotation</th>
+                            <th width="15%">Invoice</th>
                             <th width="5%">Actions</th>
                         </tr>
                     </thead>
@@ -158,7 +158,7 @@
                     <input type="checkbox" class="form-check-input print-option" value="parts"
                         id="printParts" style="width: 22px; height: 22px; cursor: pointer; margin-top: 0;">
                     <label class="form-check-label fw-bold" for="printParts" style="cursor: pointer; font-size: 15px; margin-left: 12px;">
-                        Parts List
+                        Purse List
                     </label>
                 </div>
                 <div class="form-check mb-3">
@@ -183,7 +183,83 @@
         </div>
     </div>
 </div>
+<!-- Change Status Modal -->
 
+<div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="changeStatusModalLabel">
+                    <i class="fas fa-exchange-alt me-2"></i> Change Job Status
+                </h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="changeStatusForm">
+                @csrf
+                <input type="hidden" name="job_id" id="status_job_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Status</label>
+                        <select name="job_status" id="job_status_select" class="form-control" required>
+                            <option value="pending">Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="delivered">Delivered</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="delivery_date_field" style="display: none;">
+                        <label class="form-label fw-bold">Delivery Date</label>
+                        <input type="date" name="delivery_date" id="delivery_date" class="form-control" value="{{ date('Y-m-d') }}">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveStatusBtn">
+                        <i class="fas fa-save me-2"></i> Update Status
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Challan Print Options Modal -->
+<div class="modal fade" id="challanPrintModal" tabindex="-1" aria-labelledby="challanPrintModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="challanPrintModalLabel">
+                    <i class="fas fa-truck me-2"></i> Challan Print Options
+                </h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-bold mb-3">Select challan format:</p>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input challan-option" value="with_service" id="withService" style="width: 18px; height: 18px; cursor: pointer;">
+                    <label class="form-check-label fw-bold ms-2" for="withService" style="cursor: pointer;">
+                        With Service List
+                    </label>
+                    <div class="text-muted small ms-4">Service details with quantity, price and total</div>
+                </div>
+                <div class="form-check mb-3">
+                    <input type="checkbox" class="form-check-input challan-option" value="without_service" id="withoutService" style="width: 18px; height: 18px; cursor: pointer;">
+                    <label class="form-check-label fw-bold ms-2" for="withoutService" style="cursor: pointer;">
+                        Without Service List
+                    </label>
+                    <div class="text-muted small ms-4">Only job descriptions, no service details</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmChallanPrint">
+                    <i class="fas fa-print me-2"></i> Print Challan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @include('admin.partials.payments.payment-section', ['inline' => false])
 
 @endsection
@@ -235,7 +311,7 @@
                 name: 'engine',
                 orderable: true,
                 searchable: true,
-                className: 'text-center'
+                className: ''
             },
             {
                 data: 'status_badge',
@@ -448,5 +524,250 @@ $('#confirmPrint').click(function() {
             inline: false
         });
     });
+
+    // Convert to Invoice Button Handler
+    $(document).on('click', '.convert-to-invoice-btn', function() {
+        var jobId = $(this).data('id');
+
+        Swal.fire({
+            title: 'Convert to Invoice?',
+            text: 'This will create an invoice from the existing quotation. Do you want to proceed?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, convert it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                convertQuotationToInvoice(jobId);
+            }
+        });
+    });
+
+    // Convert Quotation to Invoice Function
+    function convertQuotationToInvoice(jobId) {
+        Swal.fire({
+            title: 'Processing...',
+            text: 'Please wait while converting to invoice.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        $.ajax({
+            url: "{{ url('admin/job-quotations/convert-to-invoice') }}",
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                job_id: jobId
+            },
+            dataType: 'json',
+            success: function(response) {
+                Swal.close();
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(function() {
+                        // Reload DataTable to update button visibility
+                        $('#jobs-table').DataTable().ajax.reload();
+                    });
+                } else {
+                    Swal.fire('Error!', response.message || 'Failed to convert to invoice', 'error');
+                }
+            },
+            error: function(xhr) {
+                Swal.close();
+                var errorMsg = 'Failed to convert to invoice';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                Swal.fire('Error!', errorMsg, 'error');
+            }
+        });
+    }
+
+// Change Status Button Handler
+$(document).on('click', '.change-status-btn', function() {
+    var jobId = $(this).data('id');
+    var currentStatus = $(this).data('status');
+    var currentDeliveryDate = $(this).data('delivery-date') || '';
+
+    $('#status_job_id').val(jobId);
+    $('#job_status_select').val(currentStatus);
+
+    // Show/hide delivery date field based on status
+    if (currentStatus === 'delivered') {
+        $('#delivery_date_field').show();
+        if (currentDeliveryDate) {
+            $('#delivery_date').val(currentDeliveryDate);
+        } else {
+            $('#delivery_date').val('{{ date("Y-m-d") }}');
+        }
+    } else {
+        $('#delivery_date_field').hide();
+    }
+
+    $('#changeStatusModal').modal('show');
+});
+
+// Show/hide delivery date field when status changes
+$('#job_status_select').on('change', function() {
+    if ($(this).val() === 'delivered') {
+        $('#delivery_date_field').show();
+        if (!$('#delivery_date').val()) {
+            $('#delivery_date').val('{{ date("Y-m-d") }}');
+        }
+    } else {
+        $('#delivery_date_field').hide();
+    }
+});
+
+// Change Status Form Submit
+$('#changeStatusForm').on('submit', function(e) {
+    e.preventDefault();
+
+    var jobId = $('#status_job_id').val();
+    var newStatus = $('#job_status_select').val();
+    var deliveryDate = $('#delivery_date').val();
+
+    var submitBtn = $('#saveStatusBtn');
+    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+
+    var postData = {
+        _token: "{{ csrf_token() }}",
+        job_id: jobId,
+        job_status: newStatus
+    };
+
+    if (newStatus === 'delivered' && deliveryDate) {
+        postData.delivery_date = deliveryDate;
+    }
+
+    $.ajax({
+        url: "{{ url('admin/job-books/change-status') }}",
+        type: 'POST',
+        data: postData,
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: response.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(function() {
+                    $('#changeStatusModal').modal('hide');
+                    $('#jobs-table').DataTable().ajax.reload();
+                });
+            } else {
+                Swal.fire('Error!', response.message || 'Failed to update status', 'error');
+            }
+        },
+        error: function(xhr) {
+            Swal.fire('Error!', xhr.responseJSON?.message || 'Failed to update status', 'error');
+        },
+        complete: function() {
+            submitBtn.prop('disabled', false).html('<i class="fas fa-save me-2"></i> Update Status');
+        }
+    });
+});
+
+// Challan Print Button Handler
+var challanJobId = null;
+$(document).on('click', '.challan-print-btn', function() {
+    challanJobId = $(this).data('id');
+    $('#withService').prop('checked', true);
+    $('#withoutService').prop('checked', false);
+    $('#challanPrintModal').modal('show');
+});
+
+// Challan Print Button Handler
+var challanJobId = null;
+$(document).on('click', '.challan-print-btn', function() {
+    challanJobId = $(this).data('id');
+    $('#withService').prop('checked', true);
+    $('#withoutService').prop('checked', false);
+    $('#challanPrintModal').modal('show');
+});
+
+// Make checkboxes mutually exclusive
+$(document).on('change', '.challan-option', function() {
+    if ($(this).attr('id') === 'withService' && $(this).is(':checked')) {
+        $('#withoutService').prop('checked', false);
+    }
+    if ($(this).attr('id') === 'withoutService' && $(this).is(':checked')) {
+        $('#withService').prop('checked', false);
+    }
+});
+
+// Confirm Challan Print
+$('#confirmChallanPrint').click(function() {
+    var selectedOptions = [];
+    if ($('#withService').is(':checked')) {
+        selectedOptions.push('with_service');
+    }
+    if ($('#withoutService').is(':checked')) {
+        selectedOptions.push('without_service');
+    }
+
+    if (selectedOptions.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No Selection',
+            text: 'Please select at least one challan format.'
+        });
+        return;
+    }
+
+    $('#challanPrintModal').modal('hide');
+
+    Swal.fire({
+        title: 'Preparing challan...',
+        text: 'Please wait while we prepare your challan.',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    $.ajax({
+        url: "{{ url('admin/job-books/print-challan') }}",
+        type: 'POST',
+        data: {
+            _token: "{{ csrf_token() }}",
+            job_id: challanJobId,
+            formats: selectedOptions
+        },
+        success: function(response) {
+            Swal.close();
+            if (response.success && response.html) {
+                var printTab = window.open();
+                printTab.document.write(response.html);
+                printTab.document.close();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: response.message || 'Failed to generate challan.'
+                });
+            }
+        },
+        error: function(xhr) {
+            Swal.close();
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: xhr.responseJSON?.message || 'An error occurred while preparing challan.'
+            });
+        }
+    });
+});
 </script>
 @endsection

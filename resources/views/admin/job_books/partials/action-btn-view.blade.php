@@ -14,15 +14,43 @@
             </a>
         </li>
         <li>
+            <a href="{{ route('admin.job-parts.create') }}?job_id={{ $id }}" class="custom-dropdown dropdown-item">
+                <i class="fas fa-microchip me-2 text-info"></i> Purse List
+            </a>
+        </li>
+        <li>
             <button type="button" class="custom-dropdown dropdown-item print-btn" data-id="{{ $id }}" data-bs-toggle="modal" data-bs-target="#printOptionsModal">
                 <i class="fas fa-print me-2 text-success"></i> Print
             </button>
         </li>
+        @if($job_status == 'delivered')
+        <li>
+            <button type="button" class="custom-dropdown dropdown-item challan-print-btn" data-id="{{ $id }}">
+                <i class="fas fa-truck me-2 text-success"></i> Challan Print
+            </button>
+        </li>
+        @endif
+
+        @if(isset($show_convert_btn) && $show_convert_btn)
+        <li>
+            <button type="button" class="custom-dropdown dropdown-item convert-to-invoice-btn" data-id="{{ $id }}">
+                <i class="fas fa-exchange-alt me-2 text-warning"></i> Convert to Invoice
+            </button>
+        </li>
+        @endif
         <li>
             <button type="button" class="custom-dropdown dropdown-item payment-btn"
                 data-id="{{ $id }}"
                 data-customer-id="{{ $customer_id }}">
                 <i class="fas fa-money-bill-wave me-2 text-success"></i> Payment
+            </button>
+        </li>
+        <li>
+            <button type="button" class="custom-dropdown dropdown-item change-status-btn"
+                data-id="{{ $id }}"
+                data-status="{{ $job_status }}"
+                data-delivery-date="{{ $delivery_date ?? '' }}">
+                <i class="fas fa-exchange-alt me-2 text-primary"></i> Change Status
             </button>
         </li>
         <li>
